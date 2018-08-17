@@ -182,10 +182,12 @@ ID=$(uuidgen) && aws route53 create-hosted-zone --name subdomain.example.com --c
 ## **Example**. Configure DNS with `Scenario 2` and [`Name.com`](https://name.com) registrar
 
 * Create AWS Route53 Hosted Zone
+
 ```bash
 $ ID=$(uuidgen) && aws route53 create-hosted-zone --name example.com --caller-reference $ID
 ```
 * Get NS record of the created Zone
+
 ```bash
 # get zone Id
 $ aws route53 list-hosted-zones | jq '.HostedZones[] | select(.Name=="example.com.") | .Id'
