@@ -1,0 +1,30 @@
+config:
+  clientID: {{CLIENT_ID}}
+  clientSecret: {{CLIENT_SECRET}}
+  cookieSecret: {{COOKIE_SECRET}}
+image:
+  repository: "dimag/oauth2_proxy"
+  tag: "kubernetes"
+  pullPolicy: "IfNotPresent"
+extraArgs:
+  provider: "oidc"
+  oidc-issuer-url: "https://dex.{{DNS_ZONE}}"
+  redirect-url: "https://oauth2.{{DNS_ZONE}}/oauth2/callback"
+  whitelist-domain: ".{{DNS_ZONE}}"
+  cookie-domain: ".{{DNS_ZONE}}"
+  cookie-secure: true
+  cookie-name: "oauth2"
+  email-domain: "*"
+  upstream: "file:///dev/null"
+  http-address: "0.0.0.0:4180"
+  skip-provider-button: true
+  set-authorization-header: true
+ingress:
+  enabled: true
+  path: /
+  hosts:
+    - oauth2.{{DNS_ZONE}}
+  tls:
+    - secretName: oauth2-tls
+      hosts:
+        - oauth2.{{DNS_ZONE}}

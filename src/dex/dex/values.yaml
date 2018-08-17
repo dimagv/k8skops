@@ -1,0 +1,121 @@
+# Default values for dex
+# This is a YAML-formatted file.
+# Declare name/value pairs to be passed into your templates.
+# name: value
+
+image: quay.io/coreos/dex
+imageTag: "v2.10.0"
+imagePullPolicy: "IfNotPresent"
+
+inMiniKube: false
+
+nodeSelector: {}
+
+replicas: 1
+
+# resources:
+  # limits:
+    # cpu: 100m
+    # memory: 50Mi
+  # requests:
+    # cpu: 100m
+    # memory: 50Mi
+
+ports:
+  - name: http
+    containerPort: 8080
+    protocol: TCP
+  - name: grpc
+    containerPort: 5000
+    protocol: TCP
+
+service:
+  type: ClusterIP
+  httpServicePort: 8080
+  grpcServicePort: 5000
+  annotations: {}
+
+extraVolumes: []
+extraVolumeMounts: []
+
+env: []
+
+rbac:
+  # Specifies whether RBAC resources should be created
+  create: true
+
+serviceAccount:
+  # Specifies whether a ServiceAccount should be created
+  create: true
+  # The name of the ServiceAccount to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name:
+
+config:
+  issuer: https://dex.io
+  storage:
+    type: kubernetes
+    config:
+      inCluster: true
+  logger:
+    level: debug
+  web:
+    http: 0.0.0.0:8080
+  grpc:
+    addr: 0.0.0.0:5000
+  connectors:
+#  - type: github
+#    id: github
+#    name: GitHub
+#    config:
+#      clientID: xxxxxxxxxxxxxxx
+#      clientSecret: yyyyyyyyyyyyyyyyyyyyy
+#      redirectURI: https://dex.minikube.local:5556/callback
+#      org: kubernetes
+  oauth2:
+    skipApprovalScreen: true
+
+#  staticClients:
+#  - id: example-app
+#    redirectURIs:
+#    - 'http://192.168.42.219:31850/oauth2/callback'
+#    name: 'Example App'
+#    secret: ZXhhbXBsZS1hcHAtc2VjcmV0
+#
+  enablePasswordDB: true
+# staticPasswords:
+#  - email: "admin@example.com"
+#    # bcrypt hash of the string "password"
+#    hash: "$2a$10$2b2cU8CPhOTaGrs1HRQuAueS7JTT5ZHsHSzYiFPm1leZck7Mc8T4W"
+#    username: "admin"
+#    userID: "08a8684b-db88-4b73-90a9-3cd1661f5466"
+
+ingress:
+  ## If true, Kubernetes Dex Ingress will be created.
+  ##
+  enabled: false
+
+  ## Kubernetes Dex Ingress annotations
+  ##
+  # annotations:
+  #   kubernetes.io/ingress.class: nginx
+  #   nginx.ingress.kubernetes.io/secure-backends: "true"
+  #   kubernetes.io/tls-acme: 'true'
+
+  ## Kubernetes Dex Ingress path
+  ##
+  path: /
+
+  ## Kubernetes Dex Ingress hostnames
+  ## Must be provided if Ingress is enabled
+  ##
+  # hosts:
+  #   - kubernetes-dex.domain.com
+
+  ## Kubernetes Dex Ingress TLS configuration
+  ## Secrets must be manually created in the namespace
+  ##
+  # tls:
+  #   - secretName: kubernetes-dex-tls
+  #     hosts:
+  #       - kubernetes-dex.domain.com

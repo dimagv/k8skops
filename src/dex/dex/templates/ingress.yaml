@@ -1,0 +1,42 @@
+{{- if .Values.ingress.enabled -}}
+{{- $serviceName := include "dex.fullname" . -}}
+{{- $httpServicePort := .Values.service.httpServicePort -}}
+{{- $path := .Values.ingress.path -}}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ template "dex.fullname" . }}
+  labels:
+    app: {{ template "dex.name" . }}
+    chart: {{ template "dex.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+{{- if .Values.ingress.annotations }}
+  annotations:
+{{ toYaml .Values.ingress.annotations | indent 4 }}
+{{- end }}
+spec:
+  rules:
+  {{- if .Values.ingress.hosts }}
+  {{- range $host := .Values.ingress.hosts }}
+    - host: {{ $host }}
+      http:
+        paths:
+          - path: {{ $path }}
+            backend:
+              serviceName: {{ $serviceName }}
+              servicePort: {{ $httpServicePort }}
+  {{- end -}}
+  {{- else }}
+    - http:
+        paths:
+          - path: {{ $path }}
+            backend:
+              serviceName: {{ $serviceName }}
+              servicePort: {{ $httpServicePort }}
+  {{- end -}}
+  {{- if .Values.ingress.tls }}
+  tls:
+{{ toYaml .Values.ingress.tls | indent 4 }}
+  {{- end -}}
+{{- end -}}
