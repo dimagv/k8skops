@@ -6,6 +6,7 @@ Universal authentication & authorization platform for web, mobile, and legacy ap
 1. Sign Up [link](https://auth0.com/signup?&signUpData=%7B%22category%22%3A%22button%22%7D)
 2. Create new application [link](https://manage.auth0.com/#/applications)
 3. Set `Allowed Callback URLs` (App Settings Tab)
+
 ```sh
 https://dex.example.com/callback # replace example.com
 http://127.0.0.1:5555/callback
@@ -16,6 +17,7 @@ http://127.0.0.1:5555/callback
 5. Enable DB connection (App Connections Tab)
 6. Create new user [link](https://manage.auth0.com/#/users)
 7. Get application Client ID, Client Secret, Domain (App Settings Tab)
+
 ```sh
 Domain:        gdv.eu.auth0.com
 Client ID:     smcFVCQlqiSgyHpgP9WzcRJCsd3gNOYG
