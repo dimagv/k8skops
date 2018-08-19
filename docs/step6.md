@@ -1,8 +1,176 @@
 # Step 6. Insurancetruck App
 
-1. mysql
-2. backend
-3. frontend
+### 1. Mysql [link](https://www.mysql.com/)
+
+```sh
+$ MYSQL_ROOT_PASS=dev2016
+$ MYSQL_USER=dev
+$ MYSQL_PASS=dev2016
+$ MYSQL_DB=dev_insurance
+
+$ mysql=src/mysql/values.yaml
+$ sed -i -e "s@{{MYSQL_ROOT_PASS}}@${MYSQL_ROOT_PASS}@g" "${mysql}"
+$ sed -i -e "s@{{MYSQL_USER}}@${MYSQL_USER}@g" "${mysql}"
+$ sed -i -e "s@{{MYSQL_PASS}}@${MYSQL_PASS}@g" "${mysql}"
+$ sed -i -e "s@{{MYSQL_DB}}@${MYSQL_DB}@g" "${mysql}"
+
+$ helm install --name insurancetruck-db -f $mysql stable/mysql --namespace it-dev
+
+# wait some time
+$ kubectl get po -n it-dev -w
+```
+
+### 2. Import Mysql DB
+
+```sh
+# run port-forward command in another terminal 
+$ kubectl port-forward $(kubectl get pods --selector=app=insurancetruck-db-mysql -n it-dev --output=jsonpath={.items..metadata.name}) -n it-dev 3306
+
+$ kubectl run mysql-client --image=mysql:5.7 -i --rm --restart=Never -- mysql -h insurancetruck-db-mysql -uroot -pdev2016 dev_insurance < src/mysql/dev_insurance.sql
+
+# test
+kubectl run mysql-client --image=mysql:5.7 -it --rm --restart=Never -- mysql -h insurancetruck-db-mysql -uroot -pdev2016 dev_insurance -e 'SHOW TABLES;'
+```
+
+### 3. phpMyAdmin [link](https://www.phpmyadmin.net/)
+
+```sh
+$ DNS_ZONE=example.com
+$ pma=src/pma/values.yaml
+$ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" "${pma}"
+$ helm install --name insurancetruck-pma -f $pma stable/phpmyadmin --namespace it-dev
+
+$ cert=src/pma/pma-certificate.yaml
+$ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" "${cert}"
+$ kubectl apply -f $cert
+
+check https://pma.example.com # replace example.com
+```
+
+### 4. Deploy `it_2.71_backend` [link](http://54.152.51.78:10080/ironjab/it_2.71_backend)
+
+#### 4.1. Create AWS ECR repo
+
+```sh
+$ aws ecr create-repository --repository-name insurancetruck/backend
+
+Output:
+{                                                 
+    "repository": {                               
+        "repositoryArn": "arn:aws:ecr:eu-central-1:784590408214:repository/insurancetruck/backend",  
+        "registryId": "784590408214",             
+        "repositoryName": "insurancetruck/backend",                                                  
+        "repositoryUri": "784590408214.dkr.ecr.eu-central-1.amazonaws.com/insurancetruck/backend",   
+        "createdAt": 1534613601.0                 
+    }                                             
+}     
+```
+
+#### 4.2. Build docker image
+
+```sh
+$ git clone ssh://git@54.152.51.78:10022/ironjab/it_2.71_backend.git
+$ docker build -t 784590408214.dkr.ecr.eu-central-1.amazonaws.com/insurancetruck/backend:latest it_2.71_backend
+```
+
+#### 4.3. Push docker image
+
+```sh
+# retrieve the login command to use to authenticate your Docker client to your registry.
+$ $(aws ecr get-login --no-include-email --region eu-central-1)
+$ docker push 784590408214.dkr.ecr.eu-central-1.amazonaws.com/insurancetruck/backend:latest
+```
+
+#### 4.4. Deploy helm chart
+
+```sh
+$ DNS_ZONE=example.com
+$ REPO=784590408214.dkr.ecr.eu-central-1.amazonaws.com/insurancetruck/backend
+$ MYSQL_ROOT_PASS=dev2016
+$ MYSQL_USER=dev
+$ MYSQL_PASS=dev2016
+$ MYSQL_DB=dev_insurance
+$ REDIS_PASS=dev2016
+
+$ it=src/it-backend/values.yaml
+$ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" "${it}"
+$ sed -i -e "s@{{REPO}}@${REPO}@g" "${it}"
+$ sed -i -e "s@{{MYSQL_ROOT_PASS}}@${MYSQL_ROOT_PASS}@g" "${it}"
+$ sed -i -e "s@{{MYSQL_USER}}@${MYSQL_USER}@g" "${it}"
+$ sed -i -e "s@{{MYSQL_PASS}}@${MYSQL_PASS}@g" "${it}"
+$ sed -i -e "s@{{MYSQL_DB}}@${MYSQL_DB}@g" "${it}"
+$ sed -i -e "s@{{REDIS_PASS}}@${REDIS_PASS}@g" "${it}"
+$ helm install --name it-backend -f $it src/it-backend/it-backend --namespace=it-dev
+
+$ cert=src/it-backend/it-backend-certificate.yaml
+$ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" "${cert}"
+$ kubectl apply -f $cert
+
+check https://it-backend.example.com # replace example.com
+```
+
+### 5. Deploy `it_2.71_frontend` [link](http://54.152.51.78:10080/ironjab/it_2.71_frontend)
+
+#### 5.1. Create AWS ECR repo
+```sh
+$ aws ecr create-repository --repository-name insurancetruck/frontend
+
+Output:
+{
+    "repository": {
+        "repositoryArn": "arn:aws:ecr:eu-central-1:784590408214:repository/insurancetruck/frontend",
+        "registryId": "784590408214",
+        "repositoryName": "insurancetruck/frontend",
+        "repositoryUri": "784590408214.dkr.ecr.eu-central-1.amazonaws.com/insurancetruck/frontend",
+        "createdAt": 1534620051.0
+    }
+}
+```
+
+#### 5.2. Build docker image
+
+```sh
+$ git clone ssh://git@54.152.51.78:10022/ironjab/it_2.71_frontend
+$ cd it_2.71_frontend
+$ vi webpack.prod.config.js # change `process.env.API_URL` => https://it-backend.example.com
+$ chmod +x docker-build.sh && ./docker-build.sh # install nodejs+yarn before
+$ docker build -t 784590408214.dkr.ecr.eu-central-1.amazonaws.com/insurancetruck/frontend:latest .
+$ cd ..
+```
+
+#### 5.3. Push docker image
+
+```sh
+# retrieve the login command to use to authenticate your Docker client to your registry.
+$ $(aws ecr get-login --no-include-email --region eu-central-1)
+$ docker push 784590408214.dkr.ecr.eu-central-1.amazonaws.com/insurancetruck/frontend:latest
+```
+
+#### 5.4. Deploy helm chart
+
+```sh
+$ DNS_ZONE=example.com
+$ REPO=784590408214.dkr.ecr.eu-central-1.amazonaws.com/insurancetruck/frontend
+
+$ it=src/it-frontend/values.yaml
+$ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" "${it}"
+$ sed -i -e "s@{{REPO}}@${REPO}@g" "${it}"
+$ helm install --name it-frontend -f $it src/it-frontend/it-frontend --namespace=it-dev
+
+$ cert=src/it-frontend/it-frontend-certificate.yaml
+$ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" "${cert}"
+$ kubectl apply -f $cert
+
+check https://it-frontend.example.com # replace example.com
+```
+
+## Demo
+
+<p align="center">
+  <a target="_blank" href="https://asciinema.org/a/197051">
+  <img src="https://asciinema.org/a/197051.png" width="885"></image>
+  </a>
+</p>
 
 # What's next?
 

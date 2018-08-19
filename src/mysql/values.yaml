@@ -1,0 +1,39 @@
+image: "mysql"
+imageTag: "8.0.12"
+imagePullPolicy: IfNotPresent
+
+mysqlRootPassword: {{MYSQL_ROOT_PASS}}
+mysqlUser: {{MYSQL_USER}}
+mysqlPassword: {{MYSQL_PASS}}
+mysqlDatabase: {{MYSQL_DB}}
+
+persistence:
+  enabled: true
+  accessMode: ReadWriteOnce
+  size: 8Gi
+
+resources:
+  requests:
+    memory: 256Mi
+    cpu: 100m
+
+configurationFiles:
+  mysql.cnf: |-
+    [mysqld]
+    default_authentication_plugin=mysql_native_password
+    sql_mode=
+    skip-host-cache
+    skip-name-resolve
+    datadir=/var/lib/mysql
+    socket=/var/run/mysqld/mysqld.sock
+    pid-file=/var/run/mysqld/mysqld.pid
+
+# Custom mysql init SQL files used to initialize the database
+initializationFiles: {}
+#  first-db.sql: |-
+#    CREATE DATABASE IF NOT EXISTS first DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
+#  second-db.sql: |-
+#    CREATE DATABASE IF NOT EXISTS second DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
+
+metrics:
+  enabled: true

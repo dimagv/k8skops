@@ -4,6 +4,6 @@
 3. [Configure cluster](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step3.md)
 4. [AuthN and AuthZ](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step4.md)
 5. [Monitoring](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step5.md)
-6. TODO: [Insurancetruck App](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step6.md)
-7. TODO: [Drone.io (CI/CD)](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step7.md)
+6. [Insurancetruck App](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step6.md)
+7. [Drone.io (CI/CD)](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step7.md)
 8. TODO: [Additionally](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step8.md)

@@ -1,0 +1,36 @@
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  hosts:
+    - drone.{{DNS_ZONE}}
+  tls:
+    - secretName: drone-tls
+      hosts:
+        - drone.{{DNS_ZONE}}
+server:
+  host: "https://drone.{{DNS_ZONE}}"
+  env:
+    DRONE_ADMIN: {{GOGS_USER}}
+    DRONE_PROVIDER: gogs
+    DRONE_OPEN: false
+    DRONE_GOGS: true
+    DRONE_GOGS_URL: http://54.152.51.78:10080
+persistence:
+  enabled: true
+  size: 25Gi
+  storageClass: gp2-resize
+agent:
+  replicas: 1
+  env:
+    DRONE_DEBUG: "true"
+dind:
+  env:
+    DRONE_DEBUG: "true"
+  resources:
+    requests:
+      memory: 32Mi
+      cpu: 40m
+    limits:
+      memory: 1Gi
+      cpu: 500m

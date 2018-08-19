@@ -55,11 +55,6 @@ $ ssh-keygen -t rsa -N "" -f id_rsa
 * AmazonVPCFullAccess
 
 ```sh
-$ cp credentials.example credentials
-$ vi credentials
-
-OR
-
 export AWS_ACCESS_KEY_ID=
 export AWS_SECRET_ACCESS_KEY=
 ```

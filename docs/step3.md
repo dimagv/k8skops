@@ -50,24 +50,41 @@ Configure external DNS servers (AWS Route53, Google CloudDNS and others) for Kub
 `ExternalDNS` synchronizes exposed Kubernetes Services and Ingresses with DNS providers.
 
 ```sh
-DNS_ZONE=example.com
-
-dns=src/external-dns/deployment.yaml
-$ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" "${dns}"
-$ kubectl apply -f src/external-dns
+$ DNS_ZONE=example.com
+$ dns=src/external-dns
+$ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" "${dns}/deployment.yaml"
+$ kubectl apply -f $dns
 ```
 
 ### 7. Cert-manager [link](https://github.com/jetstack/cert-manager)
 Automatically provision and manage TLS certificates in Kubernetes.
 
 ```sh
-EMAIL=example@email.com
-
-issuer=src/cert-manager/issuer.yaml
+$ EMAIL="example\@email.com" # backslash required
+$ issuer=src/cert-manager/issuer.yaml
 $ sed -i -e "s@{{EMAIL}}@${EMAIL}@g" "${issuer}"
 $ helm install --name cert-manager --namespace kube-system stable/cert-manager
-$ kubectl apply -f cert-manager/issuer.yaml
+$ kubectl apply -f $issuer
 ```
+
+### 8. Check created k8s resources
+
+```sh
+$ helm ls
+$ kubectl get namespaces
+$ kubectl get storageclass gp2-resize
+$ kubectl get deploy metrics-server -n kube-system 
+$ kubectl get deploy external-dns -n it-dev
+$ kubectl get clusterissuer letsencrypt-prod
+```
+
+## Demo
+
+<p align="center">
+  <a target="_blank" href="https://asciinema.org/a/197030">
+  <img src="https://asciinema.org/a/197030.png" width="885"></image>
+  </a>
+</p>
 
 # What's next?
 

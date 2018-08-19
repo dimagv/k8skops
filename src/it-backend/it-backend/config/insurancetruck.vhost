@@ -1,0 +1,16 @@
+<VirtualHost _default_:80>
+  ServerAdmin webmaster@localhost
+  <FilesMatch "\.ph(p3?|tml)$">
+    SetHandler None
+  </FilesMatch>
+  <IfModule mod_php7.c>
+    DocumentRoot /home/insurancetruck
+    AddType application/x-httpd-php .php
+    <Directory /home/insurancetruck>
+    Options FollowSymLinks
+    AllowOverride All
+    Order allow,deny
+    Allow from all
+  </Directory>
+  </IfModule>
+</VirtualHost>

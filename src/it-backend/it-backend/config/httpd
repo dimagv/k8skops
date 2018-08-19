@@ -1,0 +1,11 @@
+#HTTPD=/usr/sbin/httpd.worker
+#OPTIONS=
+#HTTPD_LANG=C
+#PIDFILE=/var/run/httpd/httpd.pid
+export URL_1=$URL_1
+export MYSQL_HOST=$MYSQL_HOST
+export MYSQL_PORT=$MYSQL_PORT
+export MYSQL_USER=$MYSQL_USER
+export MYSQL_PASS=$MYSQL_PASS
+export DB_1=$DB_1
+export SITE_TYPE=$SITE_TYPE

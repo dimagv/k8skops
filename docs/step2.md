@@ -81,13 +81,13 @@ $ terraform init
 $ terraform apply
 ```
 ```sh
-# wait your cluster
+# wait for the cluster
 $ watch kops validate cluster --state=s3://insurancetruck-k8s-ss
 ```
 
 **Please DO NOT MOVE ON until you have validated your cluster!**
 
-## Can I see it in action?
+## Demo
 
 <p align="center">
   <a target="_blank" href="https://asciinema.org/a/196849">

@@ -1,0 +1,7 @@
+dependencies:
+- name: redis
+  version: "3.0.5"
+  repository: "https://kubernetes-charts.storage.googleapis.com"
+# - name: it-vin
+#   version: "0.1.0"
+#   repository: "s3://it-charts-repo"

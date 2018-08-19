@@ -1,0 +1,21 @@
+pipeline:
+  webpack_build:
+    image: node
+    commands:
+      - chmod +x ./docker-build.sh && ./docker-build.sh
+  ecr:
+    image: plugins/ecr
+    repo: {{REPO}}
+    registry: {{REGISTRY}}
+    secrets: [ ecr_access_key, ecr_secret_key, ecr_region ]
+    tags: [ latest, "${DRONE_COMMIT_SHA:0:8}" ]
+  helm_deploy:
+    image: quay.io/ipedrazas/drone-helm
+    chart: ./helm
+    release: it-frontend
+    values: image.tag=${DRONE_COMMIT_SHA:0:8}
+    prefix: DEV
+    secrets: [ dev_api_server, dev_kubernetes_token ]
+    namespace: it-dev
+    skip_tls_verify: true
+    update_dependencies: true
