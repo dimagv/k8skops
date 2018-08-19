@@ -67,7 +67,7 @@ $ docker run --env="DRONE_SERVER=$DRONE_SERVER" --env="DRONE_TOKEN=$DRONE_TOKEN"
 
 ### 6. Configure test repos
 
-1. Clone `it_2.71_backend` and `it_2.71_frontend`
+* Clone `it_2.71_backend` and `it_2.71_frontend`
 
 ```sh
 # it-backend
@@ -75,7 +75,8 @@ $ git clone ssh://git@54.152.51.78:10022/ironjab/it_2.71_backend.git
 # it-frontend
 $ git clone ssh://git@54.152.51.78:10022/ironjab/it_2.71_frontend.git
 ```
-2. Change remote repository URL to break nothing in the working app
+
+* Change remote repository URL to break nothing in the working app
 
 ```sh
 # it-backend
@@ -85,7 +86,7 @@ $ cd it_2.71_backend && git remote set-url origin http://54.152.51.78:10080/iron
 $ cd it_2.71_frontend && git remote set-url origin http://54.152.51.78:10080/ironjab/it-frontend-test.git && cd ..
 ```
 
-3. Configure .drone.yaml
+* Configure .drone.yaml
 
 ```sh
 $ REGISTRY=784590408214.dkr.ecr.eu-central-1.amazonaws.com
@@ -105,7 +106,7 @@ $ sed -i -e "s@{{REGISTRY}}@${REGISTRY}@g" "${drone}"
 $ mv $drone it_2.71_frontend/.drone.yml
 ```
 
-4. Configure helm charts
+* Configure helm charts
 
 ```sh
 # it-backend
@@ -124,7 +125,7 @@ $ git add . && git commit -m "add ci/cd" && git push origin master
 $ cd ..
 ```
 
-5. Check
+* Check
 
 ```sh
 # should see running builds

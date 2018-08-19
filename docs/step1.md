@@ -46,7 +46,7 @@ $ pip install awscli --upgrade --user
 $ ssh-keygen -t rsa -N "" -f id_rsa
 ```
 
-### Set AWS credentials.
+### Set AWS credentials. 
 >The `kops` user will require the following IAM permissions to function properly:
 * AmazonEC2FullAccess
 * AmazonRoute53FullAccess
@@ -55,8 +55,12 @@ $ ssh-keygen -t rsa -N "" -f id_rsa
 * AmazonVPCFullAccess
 
 ```sh
-export AWS_ACCESS_KEY_ID=
-export AWS_SECRET_ACCESS_KEY=
+# configure the aws client to use your IAM user
+$ aws configure 
+
+# because "aws configure" doesn't export these vars for kops to use, we export them now
+export AWS_ACCESS_KEY_ID=$(aws configure get aws_access_key_id)
+export AWS_SECRET_ACCESS_KEY=$(aws configure get aws_secret_access_key)
 ```
 
 ## Configure DNS ([Route53 hosted zone](https://console.aws.amazon.com/route53/home?region=eu-central-1#hosted-zones:))
