@@ -42,7 +42,7 @@ $ DRONE_TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZXh0IjoiZ2R2IiwidHlwZSI6I
 $ AWS_ACCESS_KEY_ID=
 $ AWS_SECRET_ACCESS_KEY=
 $ DRONE_SA_TOKEN=$(kubectl -n kube-system get secret $(kubectl -n kube-system get secret | grep drone | awk '{print $1}') -o yaml | grep "token:" | awk '{print $2}' | base64 -d)
-$ K8S_API_SERVER=https://api.it.example.com
+$ K8S_API_SERVER=https://api.insurancetruck.example.com
 
 # it-backend-test
 $ BACKEND_REPO=ironjab/it-backend-test
