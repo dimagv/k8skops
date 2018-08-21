@@ -5,13 +5,12 @@
 
 ```sh
 $ DNS_ZONE=example.com
-$ dashboard=src/dashboard/values.yaml
-$ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" "${dashboard}"
-$ helm install --name kubernetes-dashboard src/dashboard/kubernetes-dashboard -f $dashboard --namespace it-dev
 
-$ cert=src/dashboard/kubernetes-dashboard-certificate.yaml
-$ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" "${cert}"
-$ kubectl apply -f $cert
+$ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/dashboard/values.yaml
+$ helm install --name kubernetes-dashboard src/dashboard/kubernetes-dashboard -f src/dashboard/values.yaml --namespace it-dev
+
+$ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/dashboard/kubernetes-dashboard-certificate.yaml
+$ kubectl apply -f src/dashboard/kubernetes-dashboard-certificate.yaml
 
 check https://dashboard.example.com # replace example.com
 ```
@@ -20,25 +19,23 @@ check https://dashboard.example.com # replace example.com
 `kube-prometheus` is a set of Kubernetes manifests, Grafana dashboards, and Prometheus rules combined with documentation and scripts to provide easy to operate end-to-end Kubernetes cluster monitoring with Prometheus using the Prometheus Operator.
 
 ```sh
-$ DNS_ZONE=example.com
-$ GRAFANA_ADMIN_USER=admin # random string
-$ GRAFANA_ADMIN_PASSWORD=HeUGOIQI56Drbmm6GQ # random string
-$ prometheus=src/kube-prometheus/values.yaml
-$ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" "${prometheus}"
-$ sed -i -e "s@{{GRAFANA_ADMIN_USER}}@${GRAFANA_ADMIN_USER}@g" "${prometheus}"
-$ sed -i -e "s@{{GRAFANA_ADMIN_PASSWORD}}@${GRAFANA_ADMIN_PASSWORD}@g" "${prometheus}"
-
 $ kubectl create namespace monitoring
 $ helm repo add coreos https://s3-eu-west-1.amazonaws.com/coreos-charts/stable/
 $ helm install --name prometheus-operator --namespace=monitoring coreos/prometheus-operator
-$ helm install --name kube-prometheus --namespace=monitoring -f $prometheus coreos/kube-prometheus
 
-$ certs=src/kube-prometheus/certs
-$ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" "${certs}/alertmanager-certificate.yaml"
-$ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" "${certs}/grafana-certificate.yaml"
-$ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" "${certs}/prometheus-certificate.yaml"
+$ DNS_ZONE=example.com
+$ GRAFANA_ADMIN_USER=admin # random string
+$ GRAFANA_ADMIN_PASSWORD=HeUGOIQI56Drbmm6GQ # random string
 
-$ kubectl apply -f $certs
+$ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/kube-prometheus/values.yaml
+$ sed -i -e "s@{{GRAFANA_ADMIN_USER}}@${GRAFANA_ADMIN_USER}@g" src/kube-prometheus/values.yaml
+$ sed -i -e "s@{{GRAFANA_ADMIN_PASSWORD}}@${GRAFANA_ADMIN_PASSWORD}@g" src/kube-prometheus/values.yaml
+$ helm install --name kube-prometheus --namespace=monitoring -f src/kube-prometheus/values.yaml coreos/kube-prometheus
+
+$ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/kube-prometheus/certs/alertmanager-certificate.yaml
+$ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/kube-prometheus/certs/grafana-certificate.yaml
+$ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/kube-prometheus/certs/prometheus-certificate.yaml
+$ kubectl apply -f src/kube-prometheus/certs
 
 check https://alertmanager.example.com # replace example.com
 check https://grafana.example.com # replace example.com

@@ -39,18 +39,16 @@ $ AUTH0_DOMAIN=https://gdv.eu.auth0.com/ # slash at the end is REQUIRED
 $ AUTH0_CLIENT_ID=smcFVCQlqiSgyHpgP9WzcRJCsd3gNOYG # replace with yours
 $ AUTH0_CLIENT_SECRET=xl7P4qhGNGU1xsfM47_DyVImXrj3a9_2dqvNgdadBlZfhaq0B8gBqiTAAMA68qiu # replace with yours
 
-$ dex=src/dex/values.yaml
-$ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" "${dex}"
-$ sed -i -e "s@{{DEX_ID}}@${DEX_ID}@g" "${dex}"
-$ sed -i -e "s@{{DEX_SECRET}}@${DEX_SECRET}@g" "${dex}"
-$ sed -i -e "s@{{AUTH0_DOMAIN}}@${AUTH0_DOMAIN}@g" "${dex}"
-$ sed -i -e "s@{{AUTH0_CLIENT_ID}}@${AUTH0_CLIENT_ID}@g" "${dex}"
-$ sed -i -e "s@{{AUTH0_CLIENT_SECRET}}@${AUTH0_CLIENT_SECRET}@g" "${dex}"
-$ helm install --name dex src/dex/dex -f $dex --namespace it-dev
+$ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/dex/values.yaml
+$ sed -i -e "s@{{DEX_ID}}@${DEX_ID}@g" src/dex/values.yaml
+$ sed -i -e "s@{{DEX_SECRET}}@${DEX_SECRET}@g" src/dex/values.yaml
+$ sed -i -e "s@{{AUTH0_DOMAIN}}@${AUTH0_DOMAIN}@g" src/dex/values.yaml
+$ sed -i -e "s@{{AUTH0_CLIENT_ID}}@${AUTH0_CLIENT_ID}@g" src/dex/values.yaml
+$ sed -i -e "s@{{AUTH0_CLIENT_SECRET}}@${AUTH0_CLIENT_SECRET}@g" src/dex/values.yaml
+$ helm install --name dex src/dex/dex -f src/dex/values.yaml --namespace it-dev
 
-$ cert=src/dex/dex-certificate.yaml
-$ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" "${cert}"
-$ kubectl apply -f $cert
+$ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/dex/dex-certificate.yaml
+$ kubectl apply -f src/dex/dex-certificate.yaml
 
 check https://dex.example.com/.well-known/openid-configuration # replace example.com
 ```
@@ -66,16 +64,14 @@ $ CLIENT_ID=insurancetruck-app # value from the DEX_ID (previous step)
 $ CLIENT_SECRET=c2cHAtc2VjcmhhbXBsHAtc2VjcmV0ZXBsHAtZS1hhbXBsHAtc2cHAtc2VjcmV0 # value from the DEX_SECRET (previous step)
 $ COOKIE_SECRET=d0R2lgvNVnOFWKxjulndOQ== # python -c 'import os,base64; print base64.b64encode(os.urandom(16))'
 
-$ oauth2=src/oauth2-proxy/values.yaml
-$ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" "${oauth2}"
-$ sed -i -e "s@{{CLIENT_ID}}@${CLIENT_ID}@g" "${oauth2}"
-$ sed -i -e "s@{{CLIENT_SECRET}}@${CLIENT_SECRET}@g" "${oauth2}"
-$ sed -i -e "s@{{COOKIE_SECRET}}@${COOKIE_SECRET}@g" "${oauth2}"
-$ helm install --name oauth2-proxy src/oauth2-proxy/oauth2-proxy -f $oauth2 --namespace it-dev
+$ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/oauth2-proxy/values.yaml
+$ sed -i -e "s@{{CLIENT_ID}}@${CLIENT_ID}@g" src/oauth2-proxy/values.yaml
+$ sed -i -e "s@{{CLIENT_SECRET}}@${CLIENT_SECRET}@g" src/oauth2-proxy/values.yaml
+$ sed -i -e "s@{{COOKIE_SECRET}}@${COOKIE_SECRET}@g" src/oauth2-proxy/values.yaml
+$ helm install --name oauth2-proxy src/oauth2-proxy/oauth2-proxy -f src/oauth2-proxy/values.yaml --namespace it-dev
 
-$ cert=src/oauth2-proxy/oauth2-certificate.yaml
-$ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" "${cert}"
-$ kubectl apply -f $cert
+$ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/oauth2-proxy/oauth2-certificate.yaml
+$ kubectl apply -f src/oauth2-proxy/oauth2-certificate.yaml
 
 check https://oauth2.example.com # replace example.com
 ```
@@ -85,9 +81,8 @@ check https://oauth2.example.com # replace example.com
 $ DNS_ZONE=example.com
 $ AUTH0_USER_USERNAME=exampleUser # auth0 created user at step 1.7 username
 
-$ admin=src/admin-user/clusterrolebinding.yaml
-$ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" "${admin}"
-$ sed -i -e "s@{{AUTH0_USER_USERNAME}}@${AUTH0_USER_USERNAME}@g" "${admin}"
+$ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/admin-user/clusterrolebinding.yaml
+$ sed -i -e "s@{{AUTH0_USER_USERNAME}}@${AUTH0_USER_USERNAME}@g" src/admin-user/clusterrolebinding.yaml
 $ kubectl apply -f src/admin-user/clusterrolebinding.yaml
 ```
 

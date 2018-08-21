@@ -85,7 +85,7 @@ $ terraform apply
 $ watch kops validate cluster --state=s3://insurancetruck-k8s-ss
 ```
 
-**Please DO NOT MOVE ON until you have validated your cluster!**
+**Please DO NOT MOVE ON until you have validated the cluster!**
 
 ## Demo
 

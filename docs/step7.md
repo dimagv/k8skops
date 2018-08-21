@@ -1,21 +1,17 @@
 # Step 7. Drone.io (CI/CD)
 
-it-backend and it-frontend REVISION=1 was deployed at step 6
-
 ### 1. Deploy drone
 
 ```sh
 $ DNS_ZONE=example.com
 $ GOGS_USER=gdv
 
-$ drone=src/drone/values.yaml
-$ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" "${drone}"
-$ sed -i -e "s@{{GOGS_USER}}@${GOGS_USER}@g" "${drone}"
-$ helm install --name drone src/drone/drone -f $drone --namespace it-dev
+$ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/drone/values.yaml
+$ sed -i -e "s@{{GOGS_USER}}@${GOGS_USER}@g" src/drone/values.yaml
+$ helm install --name drone src/drone/drone -f src/drone/values.yaml --namespace it-dev
 
-$ cert=src/drone/drone-certificate.yaml
-$ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" "${cert}"
-$ kubectl apply -f $cert
+$ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/drone/drone-certificate.yaml
+$ kubectl apply -f src/drone/drone-certificate.yaml
 
 check https://drone.example.com   
 ```
@@ -49,20 +45,20 @@ $ DRONE_SA_TOKEN=$(kubectl -n kube-system get secret $(kubectl -n kube-system ge
 $ K8S_API_SERVER=https://api.it.example.com
 
 # it-backend-test
-$ REPO=ironjab/it-backend-test
-$ docker run --env="DRONE_SERVER=$DRONE_SERVER" --env="DRONE_TOKEN=$DRONE_TOKEN" drone/cli secret add -repository $REPO -image quay.io/ipedrazas/drone-helm -name dev_api_server -value $K8S_API_SERVER
-$ docker run --env="DRONE_SERVER=$DRONE_SERVER" --env="DRONE_TOKEN=$DRONE_TOKEN" drone/cli secret add -repository $REPO -image quay.io/ipedrazas/drone-helm -name dev_kubernetes_token -value $DRONE_SA_TOKEN
-$ docker run --env="DRONE_SERVER=$DRONE_SERVER" --env="DRONE_TOKEN=$DRONE_TOKEN" drone/cli secret add -repository $REPO -image plugins/ecr -name ecr_access_key -value $AWS_ACCESS_KEY_ID
-$ docker run --env="DRONE_SERVER=$DRONE_SERVER" --env="DRONE_TOKEN=$DRONE_TOKEN" drone/cli secret add -repository $REPO -image plugins/ecr -name ecr_secret_key -value $AWS_SECRET_ACCESS_KEY
-$ docker run --env="DRONE_SERVER=$DRONE_SERVER" --env="DRONE_TOKEN=$DRONE_TOKEN" drone/cli secret add -repository $REPO -image plugins/ecr -name ecr_region -value eu-central-1
+$ BACKEND_REPO=ironjab/it-backend-test
+$ docker run --env="DRONE_SERVER=$DRONE_SERVER" --env="DRONE_TOKEN=$DRONE_TOKEN" drone/cli secret add -repository $BACKEND_REPO -image quay.io/ipedrazas/drone-helm -name dev_api_server -value $K8S_API_SERVER
+$ docker run --env="DRONE_SERVER=$DRONE_SERVER" --env="DRONE_TOKEN=$DRONE_TOKEN" drone/cli secret add -repository $BACKEND_REPO -image quay.io/ipedrazas/drone-helm -name dev_kubernetes_token -value $DRONE_SA_TOKEN
+$ docker run --env="DRONE_SERVER=$DRONE_SERVER" --env="DRONE_TOKEN=$DRONE_TOKEN" drone/cli secret add -repository $BACKEND_REPO -image plugins/ecr -name ecr_access_key -value $AWS_ACCESS_KEY_ID
+$ docker run --env="DRONE_SERVER=$DRONE_SERVER" --env="DRONE_TOKEN=$DRONE_TOKEN" drone/cli secret add -repository $BACKEND_REPO -image plugins/ecr -name ecr_secret_key -value $AWS_SECRET_ACCESS_KEY
+$ docker run --env="DRONE_SERVER=$DRONE_SERVER" --env="DRONE_TOKEN=$DRONE_TOKEN" drone/cli secret add -repository $BACKEND_REPO -image plugins/ecr -name ecr_region -value eu-central-1
 
 # it-frontend-test
-$ REPO=ironjab/it-frontend-test
-$ docker run --env="DRONE_SERVER=$DRONE_SERVER" --env="DRONE_TOKEN=$DRONE_TOKEN" drone/cli secret add -repository $REPO -image quay.io/ipedrazas/drone-helm -name dev_api_server -value $K8S_API_SERVER
-$ docker run --env="DRONE_SERVER=$DRONE_SERVER" --env="DRONE_TOKEN=$DRONE_TOKEN" drone/cli secret add -repository $REPO -image quay.io/ipedrazas/drone-helm -name dev_kubernetes_token -value $DRONE_SA_TOKEN
-$ docker run --env="DRONE_SERVER=$DRONE_SERVER" --env="DRONE_TOKEN=$DRONE_TOKEN" drone/cli secret add -repository $REPO -image plugins/ecr -name ecr_access_key -value $AWS_ACCESS_KEY_ID
-$ docker run --env="DRONE_SERVER=$DRONE_SERVER" --env="DRONE_TOKEN=$DRONE_TOKEN" drone/cli secret add -repository $REPO -image plugins/ecr -name ecr_secret_key -value $AWS_SECRET_ACCESS_KEY
-$ docker run --env="DRONE_SERVER=$DRONE_SERVER" --env="DRONE_TOKEN=$DRONE_TOKEN" drone/cli secret add -repository $REPO -image plugins/ecr -name ecr_region -value eu-central-1
+$ FRONTEND_REPO=ironjab/it-frontend-test
+$ docker run --env="DRONE_SERVER=$DRONE_SERVER" --env="DRONE_TOKEN=$DRONE_TOKEN" drone/cli secret add -repository $FRONTEND_REPO -image quay.io/ipedrazas/drone-helm -name dev_api_server -value $K8S_API_SERVER
+$ docker run --env="DRONE_SERVER=$DRONE_SERVER" --env="DRONE_TOKEN=$DRONE_TOKEN" drone/cli secret add -repository $FRONTEND_REPO -image quay.io/ipedrazas/drone-helm -name dev_kubernetes_token -value $DRONE_SA_TOKEN
+$ docker run --env="DRONE_SERVER=$DRONE_SERVER" --env="DRONE_TOKEN=$DRONE_TOKEN" drone/cli secret add -repository $FRONTEND_REPO -image plugins/ecr -name ecr_access_key -value $AWS_ACCESS_KEY_ID
+$ docker run --env="DRONE_SERVER=$DRONE_SERVER" --env="DRONE_TOKEN=$DRONE_TOKEN" drone/cli secret add -repository $FRONTEND_REPO -image plugins/ecr -name ecr_secret_key -value $AWS_SECRET_ACCESS_KEY
+$ docker run --env="DRONE_SERVER=$DRONE_SERVER" --env="DRONE_TOKEN=$DRONE_TOKEN" drone/cli secret add -repository $FRONTEND_REPO -image plugins/ecr -name ecr_region -value eu-central-1
 ```
 
 ### 6. Configure test repos
@@ -93,17 +89,15 @@ $ REGISTRY=784590408214.dkr.ecr.eu-central-1.amazonaws.com
 
 # it-backend
 $ REPO=784590408214.dkr.ecr.eu-central-1.amazonaws.com/insurancetruck/backend
-$ drone=src/drone/.drone.backend.yml
-$ sed -i -e "s@{{REPO}}@${REPO}@g" "${drone}"
-$ sed -i -e "s@{{REGISTRY}}@${REGISTRY}@g" "${drone}"
-$ mv $drone it_2.71_backend/.drone.yml
+$ sed -i -e "s@{{REPO}}@${REPO}@g" src/drone/.drone.backend.yml
+$ sed -i -e "s@{{REGISTRY}}@${REGISTRY}@g" src/drone/.drone.backend.yml
+$ mv src/drone/.drone.backend.yml it_2.71_backend/.drone.yml
 
 # it-frontend
 $ REPO=784590408214.dkr.ecr.eu-central-1.amazonaws.com/insurancetruck/frontend
-$ drone=src/drone/.drone.frontend.yml
-$ sed -i -e "s@{{REPO}}@${REPO}@g" "${drone}"
-$ sed -i -e "s@{{REGISTRY}}@${REGISTRY}@g" "${drone}"
-$ mv $drone it_2.71_frontend/.drone.yml
+$ sed -i -e "s@{{REPO}}@${REPO}@g" src/drone/.drone.frontend.yml
+$ sed -i -e "s@{{REGISTRY}}@${REGISTRY}@g" src/drone/.drone.frontend.yml
+$ mv src/drone/.drone.frontend.yml it_2.71_frontend/.drone.yml
 ```
 
 * Configure helm charts

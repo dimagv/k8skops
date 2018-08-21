@@ -8,13 +8,11 @@ $ MYSQL_USER=dev
 $ MYSQL_PASS=dev2016
 $ MYSQL_DB=dev_insurance
 
-$ mysql=src/mysql/values.yaml
-$ sed -i -e "s@{{MYSQL_ROOT_PASS}}@${MYSQL_ROOT_PASS}@g" "${mysql}"
-$ sed -i -e "s@{{MYSQL_USER}}@${MYSQL_USER}@g" "${mysql}"
-$ sed -i -e "s@{{MYSQL_PASS}}@${MYSQL_PASS}@g" "${mysql}"
-$ sed -i -e "s@{{MYSQL_DB}}@${MYSQL_DB}@g" "${mysql}"
-
-$ helm install --name insurancetruck-db -f $mysql stable/mysql --namespace it-dev
+$ sed -i -e "s@{{MYSQL_ROOT_PASS}}@${MYSQL_ROOT_PASS}@g" src/mysql/values.yaml
+$ sed -i -e "s@{{MYSQL_USER}}@${MYSQL_USER}@g" src/mysql/values.yaml
+$ sed -i -e "s@{{MYSQL_PASS}}@${MYSQL_PASS}@g" src/mysql/values.yaml
+$ sed -i -e "s@{{MYSQL_DB}}@${MYSQL_DB}@g" src/mysql/values.yaml
+$ helm install --name insurancetruck-db -f src/mysql/values.yaml stable/mysql --namespace it-dev
 
 # wait some time
 $ kubectl get po -n it-dev -w
@@ -25,7 +23,6 @@ $ kubectl get po -n it-dev -w
 ```sh
 # run port-forward command in another terminal 
 $ kubectl port-forward $(kubectl get pods --selector=app=insurancetruck-db-mysql -n it-dev --output=jsonpath={.items..metadata.name}) -n it-dev 3306
-
 $ kubectl run mysql-client --image=mysql:5.7 -i --rm --restart=Never -- mysql -h insurancetruck-db-mysql -uroot -pdev2016 dev_insurance < src/mysql/dev_insurance.sql
 
 # test
@@ -36,13 +33,12 @@ kubectl run mysql-client --image=mysql:5.7 -it --rm --restart=Never -- mysql -h 
 
 ```sh
 $ DNS_ZONE=example.com
-$ pma=src/pma/values.yaml
-$ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" "${pma}"
-$ helm install --name insurancetruck-pma -f $pma stable/phpmyadmin --namespace it-dev
 
-$ cert=src/pma/pma-certificate.yaml
-$ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" "${cert}"
-$ kubectl apply -f $cert
+$ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/pma/values.yaml
+$ helm install --name insurancetruck-pma -f src/pma/values.yaml stable/phpmyadmin --namespace it-dev
+
+$ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/pma/pma-certificate.yaml
+$ kubectl apply -f src/pma/pma-certificate.yaml
 
 check https://pma.example.com # replace example.com
 ```
@@ -92,19 +88,17 @@ $ MYSQL_PASS=dev2016
 $ MYSQL_DB=dev_insurance
 $ REDIS_PASS=dev2016
 
-$ it=src/it-backend/values.yaml
-$ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" "${it}"
-$ sed -i -e "s@{{REPO}}@${REPO}@g" "${it}"
-$ sed -i -e "s@{{MYSQL_ROOT_PASS}}@${MYSQL_ROOT_PASS}@g" "${it}"
-$ sed -i -e "s@{{MYSQL_USER}}@${MYSQL_USER}@g" "${it}"
-$ sed -i -e "s@{{MYSQL_PASS}}@${MYSQL_PASS}@g" "${it}"
-$ sed -i -e "s@{{MYSQL_DB}}@${MYSQL_DB}@g" "${it}"
-$ sed -i -e "s@{{REDIS_PASS}}@${REDIS_PASS}@g" "${it}"
-$ helm install --name it-backend -f $it src/it-backend/it-backend --namespace=it-dev
+$ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/it-backend/values.yaml
+$ sed -i -e "s@{{REPO}}@${REPO}@g" src/it-backend/values.yaml
+$ sed -i -e "s@{{MYSQL_ROOT_PASS}}@${MYSQL_ROOT_PASS}@g" src/it-backend/values.yaml
+$ sed -i -e "s@{{MYSQL_USER}}@${MYSQL_USER}@g" src/it-backend/values.yaml
+$ sed -i -e "s@{{MYSQL_PASS}}@${MYSQL_PASS}@g" src/it-backend/values.yaml
+$ sed -i -e "s@{{MYSQL_DB}}@${MYSQL_DB}@g" src/it-backend/values.yaml
+$ sed -i -e "s@{{REDIS_PASS}}@${REDIS_PASS}@g" src/it-backend/values.yaml
+$ helm install --name it-backend -f src/it-backend/values.yaml src/it-backend/it-backend --namespace=it-dev
 
-$ cert=src/it-backend/it-backend-certificate.yaml
-$ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" "${cert}"
-$ kubectl apply -f $cert
+$ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/it-backend/it-backend-certificate.yaml
+$ kubectl apply -f src/it-backend/it-backend-certificate.yaml
 
 check https://it-backend.example.com # replace example.com
 ```
@@ -152,14 +146,12 @@ $ docker push 784590408214.dkr.ecr.eu-central-1.amazonaws.com/insurancetruck/fro
 $ DNS_ZONE=example.com
 $ REPO=784590408214.dkr.ecr.eu-central-1.amazonaws.com/insurancetruck/frontend
 
-$ it=src/it-frontend/values.yaml
-$ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" "${it}"
-$ sed -i -e "s@{{REPO}}@${REPO}@g" "${it}"
-$ helm install --name it-frontend -f $it src/it-frontend/it-frontend --namespace=it-dev
+$ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/it-frontend/values.yaml
+$ sed -i -e "s@{{REPO}}@${REPO}@g" src/it-frontend/values.yaml
+$ helm install --name it-frontend -f src/it-frontend/values.yaml src/it-frontend/it-frontend --namespace=it-dev
 
-$ cert=src/it-frontend/it-frontend-certificate.yaml
-$ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" "${cert}"
-$ kubectl apply -f $cert
+$ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/it-frontend/it-frontend-certificate.yaml
+$ kubectl apply -f src/it-frontend/it-frontend-certificate.yaml
 
 check https://it-frontend.example.com # replace example.com
 ```
