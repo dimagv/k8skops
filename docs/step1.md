@@ -1,5 +1,19 @@
 # Step 1. Setup your environment
 
+### Install [docker](https://docs.docker.com/install/)
+Docker is an open platform for developers and sysadmins to build, ship, and run distributed applications, whether on laptops, data center VMs, or the cloud.
+
+```sh
+$ sudo apt-get install apt-transport-https ca-certificates curl software-properties-common
+$ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+$ sudo apt-key fingerprint 0EBFCD88
+$ sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+$ sudo apt-get update && sudo apt-get install docker-ce
+$ sudo groupadd docker
+$ sudo usermod -aG docker $USER
+# Log out and log back in so that your group membership is re-evaluated.
+```
+
 ### Install [kubectl](https://kubernetes.io/docs/reference/kubectl/overview)
 > Kubernetes command-line tool, `kubectl`, to deploy and manage applications on Kubernetes. Using `kubectl`, you can inspect cluster resources; create, delete, and update components.
 ```sh
