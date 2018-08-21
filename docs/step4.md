@@ -4,7 +4,7 @@
 Universal authentication & authorization platform for web, mobile, and legacy applications.
 
 1. Sign Up [link](https://auth0.com/signup?&signUpData=%7B%22category%22%3A%22button%22%7D)
-2. Create new application (Regular Web Applications Type) [link](https://manage.auth0.com/#/applications)
+2. Create new application (`Regular Web Applications` Type) [link](https://manage.auth0.com/#/applications)
 3. Set `Allowed Callback URLs` (App Settings Tab)
 
 ```sh
