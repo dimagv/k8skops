@@ -268,6 +268,11 @@ Terraform dynamodb table (for state locking and consistency)
 $ aws dynamodb create-table --table-name insurancetruck-terraform-lock --attribute-definitions AttributeName=LockID,AttributeType=S --key-schema AttributeName=LockID,KeyType=HASH --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5
 ```
 
+Edit Terraform state config
+```sh
+$ vi terraform-state.tf
+```
+
 # What's next?
 
 ### Step 2. [Create Kubernetes cluster](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step2.md)
