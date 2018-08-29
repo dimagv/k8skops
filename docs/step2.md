@@ -15,7 +15,7 @@ $ kops update cluster insurancetruck.dimag.xyz --yes
 
 ### Wait cluster
 ```sh
-$ watch kops validate cluster --state=s3://insurancetruck-k8s-ss
+$ watch kops validate cluster
 ```
 
 **Please DO NOT MOVE ON until you have validated the cluster!**
