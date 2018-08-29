@@ -6,7 +6,7 @@ spec:
   kubelet:
     anonymousAuth: false
   additionalPolicies:
-    nodes: |
+    node: |
       [
         {
           "Effect": "Allow",
