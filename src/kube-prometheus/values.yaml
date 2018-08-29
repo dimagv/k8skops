@@ -47,7 +47,7 @@ grafana:
   adminUser: {{GRAFANA_ADMIN_USER}}
   adminPassword: {{GRAFANA_ADMIN_PASSWORD}}
   storageSpec:
-    storageClassName: gp2-resize
+    class: gp2-resize
     accessMode: "ReadWriteOnce"
     resources:
       requests:

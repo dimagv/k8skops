@@ -5,27 +5,7 @@
 $ kubectl create namespace it-dev
 ```
 
-### 2. Expanding Persistent Volumes Claims [link](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#expanding-persistent-volumes-claims)
-Expanding in-use PVCs is an alpha feature. To use it, enable the ExpandInUsePersistentVolumes feature gate. In this case, you don’t need to delete and recreate a Pod or deployment that is using an existing PVC. Any in-use PVC automatically becomes available to its Pod as soon as its file system has been expanded. This feature has no effect on PVCs that are not in use by a Pod or deployment. You must create a Pod which uses the PVC before the expansion can complete.
-
-```sh
-# create resizible storage class 
-$ kubectl apply -f src/storage-class/gp2-resize-storage-class.yaml --namespace it-dev
-```
-> Note: Expanding EBS volumes is a time consuming operation. Also, there is a per-volume quota of one modification every 6 hours.
-
-### 3. Metrics-server [link](https://kubernetes.io/docs/tasks/debug-application-cluster/core-metrics-pipeline/)
-Starting from Kubernetes 1.8, resource usage metrics, such as container CPU and memory usage, are available in Kubernetes through the Metrics API. These metrics can be either accessed directly by user, for example by using kubectl top command, or used by a controller in the cluster, e.g. Horizontal Pod Autoscaler, to make decisions.
-
-```sh
-$ kubectl apply -f src/metrics-server/v1.8.x.yaml
-# test
-$ kubectl top no
-OR
-$ kubectl get --raw /apis/metrics.k8s.io/v1beta1/nodes
-```
-
-### 4. Helm [link](https://github.com/helm/helm)
+### 2. Helm [link](https://github.com/helm/helm)
 `Helm` helps you manage Kubernetes applications — Helm Charts helps you define, install, and upgrade even the most complex Kubernetes application.
 Charts are easy to create, version, share, and publish — so start using Helm and stop the copy-and-paste madness.
 
@@ -36,7 +16,35 @@ $ kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-ad
 $ helm init --service-account tiller
 ```
 
-### 5. Ingress [link](https://kubernetes.io/docs/concepts/services-networking/ingress/)
+### 3. Kube2iam [link](https://github.com/jtblin/kube2iam)
+Provide IAM credentials to containers running inside a kubernetes cluster based on annotations.
+
+```sh
+$ AWS_ACCOUNT_ID=$(aws sts get-caller-identity --output text --query 'Account')
+$ helm install stable/kube2iam --namespace kube-system --name kube2iam --set=extraArgs.base-role-arn=arn:aws:iam::${AWS_ACCOUNT_ID}:role/,host.iptables=true,host.interface=cbr0,rbac.create=true,verbose=true
+```
+
+### 4. Expanding Persistent Volumes Claims [link](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#expanding-persistent-volumes-claims)
+Expanding in-use PVCs is an alpha feature. To use it, enable the ExpandInUsePersistentVolumes feature gate. In this case, you don’t need to delete and recreate a Pod or deployment that is using an existing PVC. Any in-use PVC automatically becomes available to its Pod as soon as its file system has been expanded. This feature has no effect on PVCs that are not in use by a Pod or deployment. You must create a Pod which uses the PVC before the expansion can complete.
+
+```sh
+# create resizible storage class 
+$ kubectl apply -f src/storage-class/gp2-resize-storage-class.yaml --namespace it-dev
+```
+> Note: Expanding EBS volumes is a time consuming operation. Also, there is a per-volume quota of one modification every 6 hours.
+
+### 5. Metrics-server [link](https://kubernetes.io/docs/tasks/debug-application-cluster/core-metrics-pipeline/)
+Starting from Kubernetes 1.8, resource usage metrics, such as container CPU and memory usage, are available in Kubernetes through the Metrics API. These metrics can be either accessed directly by user, for example by using kubectl top command, or used by a controller in the cluster, e.g. Horizontal Pod Autoscaler, to make decisions.
+
+```sh
+$ kubectl apply -f src/metrics-server/v1.8.x.yaml
+# test
+$ kubectl top no
+OR
+$ kubectl get --raw /apis/metrics.k8s.io/v1beta1/nodes
+```
+
+### 6. Ingress [link](https://kubernetes.io/docs/concepts/services-networking/ingress/)
 An API object that manages external access to the services in a cluster, typically HTTP.
 `Ingress` can provide load balancing, SSL termination and name-based virtual hosting.
 
@@ -45,17 +53,38 @@ $ kubectl create namespace nginx-ingress
 $ helm install --name nginx-ingress stable/nginx-ingress --set rbac.create=true --set controller.stats.enabled=true --set controller.metrics.enabled=true --set controller.publishService.enabled=true --namespace nginx-ingress
 ```
 
-### 6. ExternalDNS [link](https://github.com/kubernetes-incubator/external-dns)
+### 7. ExternalDNS [link](https://github.com/kubernetes-incubator/external-dns)
 Configure external DNS servers (AWS Route53, Google CloudDNS and others) for Kubernetes Ingresses and Services.
 `ExternalDNS` synchronizes exposed Kubernetes Services and Ingresses with DNS providers.
 
 ```sh
+$ AWS_ACCOUNT_ID=$(aws sts get-caller-identity --output text --query 'Account')
+$ CL=$(aws sts get-caller-identity --output text --query 'Account')
+
+$ cat > asg-policy.json << EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+          "Sid": "",
+          "Effect": "Allow",
+          "Principal": {
+            "AWS": "arn:aws:iam::${AWS_ACCOUNT_ID}:role/nodes.insurancetruck.dimag.xyz"
+          },
+          "Action": "sts:AssumeRole"
+        }
+    ]
+}
+EOF
+
+$ POLICY_NAME=k8s-external-dns
+$ aws iam create-policy --policy-name $POLICY_NAME --policy-document file://src/external-dns/policy.json
 $ DNS_ZONE=example.com
 $ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/external-dns/deployment.yaml
 $ kubectl apply -f src/external-dns
 ```
 
-### 7. Cert-manager [link](https://github.com/jetstack/cert-manager)
+### 8. Cert-manager [link](https://github.com/jetstack/cert-manager)
 Automatically provision and manage TLS certificates in Kubernetes.
 
 ```sh
@@ -66,7 +95,7 @@ $ sed -i -e "s@{{EMAIL}}@${EMAIL}@g" src/cert-manager/issuer.yaml
 $ kubectl apply -f src/cert-manager/issuer.yaml
 ```
 
-### 8. Check created k8s resources
+### 9. Check created k8s resources
 
 ```sh
 $ helm ls

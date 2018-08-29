@@ -1,0 +1,18 @@
+name: insurancetruck
+dnsZone: dimag.xyz
+awsAccountID: "784590408214"
+awsRegion: eu-central-1
+s3bucket: insurancetruck-k8s-ss
+defaultVpcID: vpc-2d885a46
+masterImage: ami-7c412f13
+masterMachineType: t2.medium
+masterMaxSize: 1
+masterMinSize: 1
+masterRootVolumeSize: 50
+nodeImage: ami-7c412f13
+nodeMachineType: t2.medium
+nodeMaxSize: 2
+nodeMixSize: 2
+nodeRootVolumeSize: 50
+publicKey: |
+  ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7xqw5xMZt+WsMczrXJ3YERmkcCXGFOuEytc+zkCS336umPMtwxpOrHYS2SglWbwsRHAZvHfYRcN19pXf3TV836oxsi0I6C4ARi64Gn3EQupdQ2w8okx8bdjxzeeYInLbbb9Qus7AwMMlu+ruJsOkkOhaVaDfvFmrTND5DjegRYvBsHHx1dlGvK4zZnbed8bB1lxpmevGmDsQjqYKZiyV8Ns6GwJMq5IbOPktoSbJ+LrCUzsAW/4caDKO9EHvK6aPza+DZaRQa6lJ9H9NybFPJMWHC3KHq7MiF3GQLCqUNaKe+s7SVF0lT0eKKYmvTLWHJY43cl6BlYRI8Mc5HjXe9 dimag@xps

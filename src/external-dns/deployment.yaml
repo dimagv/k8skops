@@ -3,6 +3,8 @@ kind: Deployment
 metadata:
   name: external-dns
   namespace: it-dev
+  annotations:
+    iam.amazonaws.com/role: k8s-external-dns
 spec:
   strategy:
     type: Recreate

@@ -31,15 +31,6 @@ $ chmod 700 get_helm.sh
 $ ./get_helm.sh
 ```
 
-### Install [terraform](https://github.com/hashicorp/terraform) 
-> `Terraform` is a tool for building, changing, and versioning infrastructure safely and efficiently. 
-> `Terraform` can manage existing and popular service providers as well as custom in-house solutions.
-```sh
-$ wget https://releases.hashicorp.com/terraform/$(curl -s https://api.github.com/repos/hashicorp/terraform/releases/latest | grep tag_name | cut -d '"' -f 4 | cut -d 'v' -f 2)/terraform_$(curl -s https://api.github.com/repos/hashicorp/terraform/releases/latest | grep tag_name | cut -d '"' -f 4 | cut -d 'v' -f 2)_linux_amd64.zip
-$ unzip terraform_0.11.1_linux_amd64.zip
-$ sudo mv terraform /usr/local/bin/
-```
-
 ### Install [kops](https://github.com/kubernetes/kops) 
 > The easiest way to get a production grade Kubernetes cluster up and running. 
 > `kops` helps you create, destroy, upgrade and maintain production-grade, highly available, Kubernetes clusters from the command line.
@@ -50,7 +41,7 @@ $ chmod +x kops-linux-amd64
 $ sudo mv kops-linux-amd64 /usr/local/bin/kops
 ```
 
-### Install [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/awscli-install-linux.html) with Pip
+### Install [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/awscli-install-linux.html) with [Pip](https://pip.pypa.io/en/stable/installing/)
 ```sh
 $ pip install awscli --upgrade --user
 ```
@@ -252,25 +243,6 @@ Kops s3 bucket
 $ aws s3api create-bucket --bucket insurancetruck-k8s-ss --region eu-central-1 --create-bucket-configuration LocationConstraint=eu-central-1
 # enable s3 bucket versioning
 $ aws s3api put-bucket-versioning --bucket insurancetruck-k8s-ss --versioning-configuration Status=Enabled
-```
-
-Terraform s3 bucket
-```sh
-# create s3 bucket
-$ aws s3api create-bucket --bucket insurancetruck-terraform-ss --region eu-central-1 --create-bucket-configuration LocationConstraint=eu-central-1
-# enable s3 bucket versioning
-$ aws s3api put-bucket-versioning --bucket insurancetruck-terraform-ss --versioning-configuration Status=Enabled
-```
-
-Terraform dynamodb table (for state locking and consistency) 
-```sh
-# create dynamodb table
-$ aws dynamodb create-table --table-name insurancetruck-terraform-lock --attribute-definitions AttributeName=LockID,AttributeType=S --key-schema AttributeName=LockID,KeyType=HASH --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5
-```
-
-Edit Terraform state config
-```sh
-$ vi terraform-state.tf
 ```
 
 # What's next?
