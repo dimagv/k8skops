@@ -1,5 +1,5 @@
 name: insurancetruck
-dnsZone: dimag.xyz
+dnsZone: example.com
 awsAccountID: "784590408214" # aws sts get-caller-identity --output text --query 'Account'
 awsRegion: eu-central-1
 s3bucket: insurancetruck-k8s-ss
