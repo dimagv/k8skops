@@ -61,7 +61,7 @@ Configure external DNS servers (AWS Route53, Google CloudDNS and others) for Kub
 # set vars
 $ vi src/external-dns/external-dns.sh 
 # run script
-$ ./src/external-dns/external-dns.sh 
+$ sudo chmod +x src/external-dns/external-dns.sh && ./src/external-dns/external-dns.sh 
 ```
 
 ### 8. Cert-manager [link](https://github.com/jetstack/cert-manager)
