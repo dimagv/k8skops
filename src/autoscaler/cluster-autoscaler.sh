@@ -34,8 +34,7 @@ echo "   The next command will open the instancegroup config in your default edi
 sleep 1
 kops edit ig $INSTANCE_GROUP_NAME --state ${KOPS_STATE_STORE} --name ${CLUSTER_NAME}
 echo "   Running kops update cluster --yes"
-kops update cluster --yes --state ${KOPS_STATE_STORE} --name ${CLUSTER_NAME} --out=. --target=terraform
-terraform apply
+kops update cluster --yes --state ${KOPS_STATE_STORE} --name ${CLUSTER_NAME}
 printf "\n"
 
 printf "   a) Creating IAM policy to allow aws-cluster-autoscaler access to AWS autoscaling groups…\n"
@@ -74,6 +73,10 @@ fi
 
 printf "   b) Attaching policy to IAM Role…\n"
 aws iam attach-role-policy --policy-arn $ASG_POLICY_ARN --role-name $IAM_ROLE
+printf " ✅ \n"
+
+printf "   c) Cleanup. Deleting policies…\n"
+rm asg-policy.json
 printf " ✅ \n"
 
 addon=cluster-autoscaler.yml
