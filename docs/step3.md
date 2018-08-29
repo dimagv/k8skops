@@ -58,30 +58,10 @@ Configure external DNS servers (AWS Route53, Google CloudDNS and others) for Kub
 `ExternalDNS` synchronizes exposed Kubernetes Services and Ingresses with DNS providers.
 
 ```sh
-$ AWS_ACCOUNT_ID=$(aws sts get-caller-identity --output text --query 'Account')
-$ CL=$(aws sts get-caller-identity --output text --query 'Account')
-
-$ cat > asg-policy.json << EOF
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-          "Sid": "",
-          "Effect": "Allow",
-          "Principal": {
-            "AWS": "arn:aws:iam::${AWS_ACCOUNT_ID}:role/nodes.insurancetruck.dimag.xyz"
-          },
-          "Action": "sts:AssumeRole"
-        }
-    ]
-}
-EOF
-
-$ POLICY_NAME=k8s-external-dns
-$ aws iam create-policy --policy-name $POLICY_NAME --policy-document file://src/external-dns/policy.json
-$ DNS_ZONE=example.com
-$ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/external-dns/deployment.yaml
-$ kubectl apply -f src/external-dns
+# set vars
+$ vi src/external-dns/external-dns.sh 
+# run script
+$ ./src/external-dns/external-dns.sh 
 ```
 
 ### 8. Cert-manager [link](https://github.com/jetstack/cert-manager)

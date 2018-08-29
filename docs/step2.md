@@ -1,21 +1,20 @@
 # Step 2. Create Kubernetes cluster
 
-### Get default VPC ID 
+### Generate cluster config
 ```sh
-$ aws ec2 describe-vpcs --filters "Name=isDefault, Values=true" | jq .Vpcs[0].VpcId
-# "vpc-2d885a46"
+$ vi src/kops-cluster-tmpl/values.yaml # replace with your values
+$ kops toolbox template --values src/kops-cluster-tmpl/values.yaml --template src/kops-cluster-tmpl/template.yaml --output cluster.yaml
 ```
 
 ### Create cluster
 ```sh
-$ vi src/kops-cluster-tmpl/values.yaml # replace with your values
-$ kops toolbox template --values src/kops-cluster-tmpl/values.yaml --template src/kops-cluster-tmpl/template.yaml --output cluster.yaml
-
 $ export KOPS_STATE_STORE=s3://insurancetruck-k8s-ss
 $ kops create -f cluster.yaml
 $ kops update cluster insurancetruck.dimag.xyz --yes
+```
 
-# wait for the cluster
+### Wait cluster
+```sh
 $ watch kops validate cluster --state=s3://insurancetruck-k8s-ss
 ```
 

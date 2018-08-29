@@ -2,7 +2,7 @@
 
 #Set all the variables in this section
 CLUSTER_NAME="insurancetruck"
-DNS_ZONE="dimag.xyz"
+DNS_ZONE="example.com"
 AWS_ACCOUNT_ID=$(aws sts get-caller-identity --output text --query 'Account')
 
 #Best-effort install script prerequisites, otherwise they will need to be installed manually.

@@ -1,9 +1,9 @@
 name: insurancetruck
 dnsZone: dimag.xyz
-awsAccountID: "784590408214"
+awsAccountID: "784590408214" # aws sts get-caller-identity --output text --query 'Account'
 awsRegion: eu-central-1
 s3bucket: insurancetruck-k8s-ss
-defaultVpcID: vpc-2d885a46
+defaultVpcID: vpc-2d885a46 # aws ec2 describe-vpcs --filters "Name=isDefault, Values=true" | jq .Vpcs[0].VpcId
 masterImage: ami-7c412f13
 masterMachineType: t2.medium
 masterMaxSize: 1
