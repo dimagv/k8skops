@@ -21,7 +21,7 @@ fi
 echo "7️⃣  Set up ExternalDNS"
 printf "\n"
 
-printf "   a) Creating IAM role with trust policy...\n"
+printf "   a) Creating IAM role with trust policy…\n"
 cat > trust-policy.json << EOF
 {
     "Version": "2012-10-17",
@@ -40,7 +40,7 @@ EOF
 
 ROLE_NAME=k8s-external-dns
 unset TESTOUTPUT
-TESTOUTPUT=$(aws iam list-roles | jq -r '.Roles[] | select(.RoleName == ${ROLE_NAME}) | .Arn')
+TESTOUTPUT=$(aws iam list-roles | jq -r '.Roles[] | select(.RoleName == "k8s-external-dns") | .Arn')
 if [[ $? -eq 0 && -n "$TESTOUTPUT" ]]
 then
   printf " ✅  Policy already exists\n"
@@ -81,7 +81,7 @@ EOF
 
 POLICY_NAME=k8s-external-dns-policy
 unset TESTOUTPUT
-TESTOUTPUT=$(aws iam list-policies | jq -r '.Policies[] | select(.PolicyName == ${POLICY_NAME}) | .Arn')
+TESTOUTPUT=$(aws iam list-policies | jq -r '.Policies[] | select(.PolicyName == "k8s-external-dns-policy") | .Arn')
 if [[ $? -eq 0 && -n "$TESTOUTPUT" ]]
 then
   printf " ✅  Policy already exists\n"
@@ -93,11 +93,15 @@ else
   printf " ✅ \n"
 fi
 
-printf "   b) Attaching policy to IAM Role…\n"
+printf "   c) Attaching policy to IAM Role…\n"
 aws iam attach-role-policy --policy-arn $POLICY_ARN --role-name $ROLE_NAME
 printf " ✅ \n"
 
-sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" deployment.yaml
-kubectl apply -f .
+printf "   d) Cleanup. Deleting policies…\n"
+rm trust-policy.json route53-policy.json
+printf " ✅ \n"
+
+sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/external-dns/deployment.yaml
+kubectl apply -f src/external-dns
 
 printf "Done\n"
