@@ -2,19 +2,32 @@
 
 ### Autoscaler [link](https://github.com/kubernetes/kops/tree/master/addons/cluster-autoscaler)
 
-* Edit `cluster-autoscaler.sh` script
+Cluster Autoscaler - a component that automatically adjusts the size of a Kubernetes Cluster so that all pods have a place to run and there are no unneeded nodes. 
 
 ```sh
+# edit `cluster-autoscaler.sh` script
 $ vi src/autoscaler/cluster-autoscaler.sh
-```
-
-* Run `cluster-autoscaler.sh` script
-
-```sh
+# run `cluster-autoscaler.sh` script
 $ ./src/autoscaler/cluster-autoscaler.sh
 ```
 
+### Ark [link](https://github.com/heptio/ark)
+
+Heptio Ark is a utility for managing disaster recovery, specifically for your Kubernetes cluster resources and persistent volumes. Brought to you by Heptio.
+
+```sh
+# create ark s3 bucket
+$ aws s3api create-bucket --bucket insurancetruck-ark --region eu-central-1 --create-bucket-configuration LocationConstraint=eu-central-1
+
+# edit `ark.sh` script
+$ vi src/ark/ark.sh
+# run `ark.sh` script
+$ ./src/ark/ark.sh
+```
+
 ### Audit [link](https://github.com/kubernetes/kops/blob/master/docs/cluster_spec.md#audit-logging)
+
+Kubernetes auditing provides a security-relevant chronological set of records documenting the sequence of activities that have affected system by individual users, administrators or other components of the system.
 
 * Edit cluster config
 
