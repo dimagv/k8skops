@@ -23,6 +23,17 @@ $ aws s3api create-bucket --bucket insurancetruck-ark --region eu-central-1 --cr
 $ vi src/ark/ark.sh
 # run `ark.sh` script
 $ ./src/ark/ark.sh
+
+# install ark cli
+$ curl -LO https://github.com/heptio/ark/releases/download/$(curl -s https://api.github.com/repos/heptio/ark/releases/latest | grep tag_name | cut -d '"' -f 4)/ark-$(curl -s https://api.github.com/repos/heptio/ark/releases/latest | grep tag_name | cut -d '"' -f 4)-linux-amd64.tar.gz | tar zx
+$ sudo tar -xzvf ark-v0.9.3-linux-amd64.tar.gz -C /usr/local/bin
+
+# set up a daily backup
+$ ark schedule create <SCHEDULE NAME> --schedule "0 7 * * *"
+
+# restore
+Update the Ark server Config, setting restoreOnlyMode to true. This prevents Backup objects from being created or deleted during your Restore process.
+$ ark restore create --from-backup <SCHEDULE NAME>-<TIMESTAMP>
 ```
 
 ### Audit [link](https://github.com/kubernetes/kops/blob/master/docs/cluster_spec.md#audit-logging)
