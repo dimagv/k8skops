@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: ark
+  namespace: monitoring
+  labels:
+    prometheus: kube-prometheus
+spec:
+  jobLabel: ark
+  endpoints:
+  - interval: 30s
+    port: metrics
+  namespaceSelector:
+    matchNames:
+    - heptio-ark
+  selector:
+    matchLabels:
+      app: ark

@@ -1,0 +1,88 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{ template "it-vin.fullname" . }}
+  labels:
+    app: {{ template "it-vin.name" . }}
+    chart: {{ template "it-vin.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "it-vin.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "it-vin.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+          - name: MYSQL_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: it-vin-secrets
+                key: mysqlRootPassword
+          - name: MYSQL_HOST
+            valueFrom:
+              secretKeyRef:
+                name: it-vin-secrets
+                key: mysqlHost
+          - name: MYSQL_PORT
+            value: "3306"
+          - name: MYSQL_USER
+            valueFrom:
+              secretKeyRef:
+                name: it-vin-secrets
+                key: mysqlUser
+          - name: MYSQL_PASS
+            valueFrom:
+              secretKeyRef:
+                name: it-vin-secrets
+                key: mysqlPass
+          - name: DB_NAME
+            valueFrom:
+              secretKeyRef:
+                name: it-vin-secrets
+                key: dbName
+          - name: SMTP_HOST
+            value: {{ .Values.smtpHost }}
+          - name: SMTP_PORT
+            value: "{{ .Values.smtpPort }}"
+          - name: SMTP_FROM
+            value: {{ .Values.smtpFrom }}
+          - name: SMTP_TO
+            value: {{ .Values.smtpTo }}
+          - name: SMTP_NAME
+            valueFrom:
+              secretKeyRef:
+                name: it-vin-secrets
+                key: smtpName
+          - name: SMTP_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: it-vin-secrets
+                key: smtpPassword
+          - name: VIN_LINK
+            value: {{ .Values.vinLink }}
+          - name: VIN_NAME
+            valueFrom:
+              secretKeyRef:
+                name: it-vin-secrets
+                key: vinName
+          - name: VIN_PASS
+            valueFrom:
+              secretKeyRef:
+                name: it-vin-secrets
+                key: vinPass
+          - name: MAIN_SITE
+            value: {{ .Values.mainSite }}
+          - name: MAIN_PORT
+            value: "{{ .Values.mainPort }}"
+      restartPolicy: Always

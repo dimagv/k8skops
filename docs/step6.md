@@ -156,6 +156,66 @@ $ kubectl apply -f src/it-frontend/it-frontend-certificate.yaml
 check https://it-frontend.example.com # replace example.com
 ```
 
+### 6. Deploy `service_vin` [link](http://54.152.51.78:10080/ironjab/service_vin)
+
+#### 6.1. Create AWS ECR repo
+
+```sh
+$ aws ecr create-repository --repository-name insurancetruck/vin
+
+Output:
+{                                                 
+    "repository": {                               
+        "repositoryArn": "arn:aws:ecr:eu-central-1:784590408214:repository/insurancetruck/vin",      
+        "registryId": "784590408214",             
+        "repositoryName": "insurancetruck/vin",   
+        "repositoryUri": "784590408214.dkr.ecr.eu-central-1.amazonaws.com/insurancetruck/vin",       
+        "createdAt": 1535728891.0                 
+    }                                             
+}    
+```
+
+#### 6.2. Build docker image
+
+```sh
+$ git clone ssh://git@54.152.51.78:10022/ironjab/service_vin.git
+$ docker build -t 784590408214.dkr.ecr.eu-central-1.amazonaws.com/insurancetruck/vin:latest service_vin
+```
+
+#### 6.3. Push docker image
+
+```sh
+# retrieve the login command to use to authenticate your Docker client to your registry.
+$ $(aws ecr get-login --no-include-email --region eu-central-1)
+$ docker push 784590408214.dkr.ecr.eu-central-1.amazonaws.com/insurancetruck/vin:latest
+```
+
+#### 6.4. Deploy helm chart
+
+```sh
+$ REPO=784590408214.dkr.ecr.eu-central-1.amazonaws.com/insurancetruck/vin
+$ MYSQL_ROOT_PASS=dev2016
+$ MYSQL_USER=dev
+$ MYSQL_PASS=dev2016
+$ MYSQL_DB=dev_insurance
+$ SMTP_NAME=AKIAI6HQ75CCY3NW7KFQ
+$ SMTP_PASS=Aj5Zi7yFWBYJF/td/D+C7XThyR5duFZkFXcHuTwGpdsN
+$ VIN_NAME=perealuc
+$ VIN_PASS="Dec2014!"
+
+$ sed -i -e "s@{{REPO}}@${REPO}@g" src/it-vin/values.yaml
+$ sed -i -e "s@{{MYSQL_ROOT_PASS}}@${MYSQL_ROOT_PASS}@g" src/it-vin/values.yaml
+$ sed -i -e "s@{{MYSQL_USER}}@${MYSQL_USER}@g" src/it-vin/values.yaml
+$ sed -i -e "s@{{MYSQL_PASS}}@${MYSQL_PASS}@g" src/it-vin/values.yaml
+$ sed -i -e "s@{{MYSQL_DB}}@${MYSQL_DB}@g" src/it-vin/values.yaml
+$ sed -i -e "s@{{SMTP_NAME}}@${SMTP_NAME}@g" src/it-vin/values.yaml
+$ sed -i -e "s@{{SMTP_PASS}}@${SMTP_PASS}@g" src/it-vin/values.yaml
+$ sed -i -e "s@{{VIN_NAME}}@${VIN_NAME}@g" src/it-vin/values.yaml
+$ sed -i -e "s@{{VIN_PASS}}@${VIN_PASS}@g" src/it-vin/values.yaml
+
+$ helm install --name it-vin -f src/it-vin/values.yaml src/it-vin/it-vin --namespace=it-dev
+```
+
 ## Demo
 
 <p align="center">
