@@ -43,7 +43,7 @@ Kubernetes auditing provides a security-relevant chronological set of records do
 * Edit cluster config
 
 ```sh
-$ kops edit cluster insurancetruck.example.com --state=s3://insurancetruck-k8s-ss
+$ kops edit cluster insurancetruck.example.com
 ```
 
 * Add audit config
@@ -140,9 +140,8 @@ spec:
 * Apply changes
 
 ```sh
-$ kops update cluster insurancetruck.example.com --state=s3://insurancetruck-k8s-ss  --yes --out=. --target=terraform
-$ terraform apply
-$ kops rolling-update cluster insurancetruck.example.com --state=s3://insurancetruck-k8s-ss --yes
+$ kops update cluster insurancetruck.example.com --yes
+$ kops rolling-update cluster insurancetruck.example.com --yes
 ```
 
 * Check
