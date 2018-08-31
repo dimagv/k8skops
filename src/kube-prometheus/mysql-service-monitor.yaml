@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: mysql
+  namespace: monitoring
+  labels:
+    prometheus: kube-prometheus
+spec:
+  jobLabel: mysql
+  endpoints:
+  - interval: 30s
+    port: metrics
+  namespaceSelector:
+    matchNames:
+    - it-dev
+  selector:
+    matchLabels:
+      app: insurancetruck-db-mysql

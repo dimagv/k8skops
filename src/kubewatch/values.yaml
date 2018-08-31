@@ -1,0 +1,14 @@
+rbac:
+  create: true
+resourcesToWatch:
+  daemonset: true
+  deployment: true
+  pod: true
+  replicaset: true
+  replicationcontroller: true
+  services: true
+  secret: true
+  configmap: true
+slack:
+  channel: {{CHANNEL}}
+  token: {{TOKEN}}

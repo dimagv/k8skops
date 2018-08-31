@@ -36,6 +36,25 @@ Update the Ark server Config, setting restoreOnlyMode to true. This prevents Bac
 $ ark restore create --from-backup <SCHEDULE NAME>-<TIMESTAMP>
 ```
 
+### Kubewatch [link](https://github.com/bitnami-labs/kubewatch)
+
+`kubewatch` is a Kubernetes watcher that currently publishes notification to Slack. Run it in your k8s cluster, and you will get event notifications in a slack channel.
+
+1. Create a new Bot: https://my.slack.com/services/new/bot
+2. Edit the bot to customize it's name, icon and retreive the API token (it starts with xoxb-)
+3. Invite the Bot into your channel by typing: /join @name_of_your_bot in the Slack message area.
+
+```sh
+$ CHANNEL='#it-kubewatch'
+$ TOKEN='xoxb-...'
+
+$ sed -i -e "s@{{CHANNEL}}@${CHANNEL}@g" src/kubewatch/values.yaml
+$ sed -i -e "s@{{TOKEN}}@${TOKEN}@g" src/kubewatch/values.yaml
+
+$ helm install --name kubewatch stable/kubewatch --values=src/kubewatch/values.yaml
+```
+
+
 ### Audit [link](https://github.com/kubernetes/kops/blob/master/docs/cluster_spec.md#audit-logging)
 
 Kubernetes auditing provides a security-relevant chronological set of records documenting the sequence of activities that have affected system by individual users, administrators or other components of the system.
