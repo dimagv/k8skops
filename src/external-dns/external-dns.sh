@@ -99,6 +99,9 @@ rm trust-policy.json policy.json
 printf " ✅ \n"
 
 sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/external-dns/deployment.yaml
+sed -i -e "s@{{NAMESPACE}}@${NAMESPACE}@g" src/external-dns/deployment.yaml
+sed -i -e "s@{{NAMESPACE}}@${NAMESPACE}@g" src/external-dns/clusterrolebinding.yaml
+sed -i -e "s@{{NAMESPACE}}@${NAMESPACE}@g" src/external-dns/serviceaccount.yaml
 kubectl apply -f src/external-dns
 
 printf "Done\n"

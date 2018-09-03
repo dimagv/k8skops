@@ -12,17 +12,17 @@ $ sed -i -e "s@{{MYSQL_ROOT_PASS}}@${MYSQL_ROOT_PASS}@g" src/mysql/values.yaml
 $ sed -i -e "s@{{MYSQL_USER}}@${MYSQL_USER}@g" src/mysql/values.yaml
 $ sed -i -e "s@{{MYSQL_PASS}}@${MYSQL_PASS}@g" src/mysql/values.yaml
 $ sed -i -e "s@{{MYSQL_DB}}@${MYSQL_DB}@g" src/mysql/values.yaml
-$ helm install --name insurancetruck-db -f src/mysql/values.yaml stable/mysql --namespace it-dev
+$ helm install --name insurancetruck-db -f src/mysql/values.yaml stable/mysql --namespace $NAMESPACE
 
 # wait some time
-$ kubectl get po -n it-dev -w
+$ kubectl get po -n $NAMESPACE -w
 ```
 
 ### 2. Import Mysql DB
 
 ```sh
 # run port-forward command in another terminal 
-$ kubectl port-forward $(kubectl get pods --selector=app=insurancetruck-db-mysql -n it-dev --output=jsonpath={.items..metadata.name}) -n it-dev 3306
+$ kubectl port-forward $(kubectl get pods --selector=app=insurancetruck-db-mysql -n $NAMESPACE --output=jsonpath={.items..metadata.name}) -n $NAMESPACE 3306
 $ kubectl run mysql-client --image=mysql:5.7 -i --rm --restart=Never -- mysql -h insurancetruck-db-mysql -uroot -pdev2016 dev_insurance < src/mysql/dev_insurance.sql
 
 # test
@@ -32,13 +32,11 @@ kubectl run mysql-client --image=mysql:5.7 -it --rm --restart=Never -- mysql -h 
 ### 3. phpMyAdmin [link](https://www.phpmyadmin.net/)
 
 ```sh
-$ DNS_ZONE=example.com
-
 $ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/pma/values.yaml
-$ helm install --name insurancetruck-pma -f src/pma/values.yaml stable/phpmyadmin --namespace it-dev
+$ helm install --name insurancetruck-pma -f src/pma/values.yaml stable/phpmyadmin --namespace $NAMESPACE
 
 $ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/pma/pma-certificate.yaml
-$ kubectl apply -f src/pma/pma-certificate.yaml
+$ kubectl apply -f src/pma/pma-certificate.yaml --namespace=$NAMESPACE
 
 check https://pma.example.com # replace example.com
 ```
@@ -80,7 +78,6 @@ $ docker push 784590408214.dkr.ecr.eu-central-1.amazonaws.com/insurancetruck/bac
 #### 4.4. Deploy helm chart
 
 ```sh
-$ DNS_ZONE=example.com
 $ REPO=784590408214.dkr.ecr.eu-central-1.amazonaws.com/insurancetruck/backend
 $ MYSQL_ROOT_PASS=dev2016
 $ MYSQL_USER=dev
@@ -95,10 +92,10 @@ $ sed -i -e "s@{{MYSQL_USER}}@${MYSQL_USER}@g" src/it-backend/values.yaml
 $ sed -i -e "s@{{MYSQL_PASS}}@${MYSQL_PASS}@g" src/it-backend/values.yaml
 $ sed -i -e "s@{{MYSQL_DB}}@${MYSQL_DB}@g" src/it-backend/values.yaml
 $ sed -i -e "s@{{REDIS_PASS}}@${REDIS_PASS}@g" src/it-backend/values.yaml
-$ helm install --name it-backend -f src/it-backend/values.yaml src/it-backend/it-backend --namespace=it-dev
+$ helm install --name it-backend -f src/it-backend/values.yaml src/it-backend/it-backend --namespace=$NAMESPACE
 
 $ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/it-backend/it-backend-certificate.yaml
-$ kubectl apply -f src/it-backend/it-backend-certificate.yaml
+$ kubectl apply -f src/it-backend/it-backend-certificate.yaml --namespace=$NAMESPACE
 
 check https://it-backend.example.com # replace example.com
 ```
@@ -143,15 +140,14 @@ $ docker push 784590408214.dkr.ecr.eu-central-1.amazonaws.com/insurancetruck/fro
 #### 5.4. Deploy helm chart
 
 ```sh
-$ DNS_ZONE=example.com
 $ REPO=784590408214.dkr.ecr.eu-central-1.amazonaws.com/insurancetruck/frontend
 
 $ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/it-frontend/values.yaml
 $ sed -i -e "s@{{REPO}}@${REPO}@g" src/it-frontend/values.yaml
-$ helm install --name it-frontend -f src/it-frontend/values.yaml src/it-frontend/it-frontend --namespace=it-dev
+$ helm install --name it-frontend -f src/it-frontend/values.yaml src/it-frontend/it-frontend --namespace=$NAMESPACE
 
 $ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/it-frontend/it-frontend-certificate.yaml
-$ kubectl apply -f src/it-frontend/it-frontend-certificate.yaml
+$ kubectl apply -f src/it-frontend/it-frontend-certificate.yaml --namespace=$NAMESPACE
 
 check https://it-frontend.example.com # replace example.com
 ```
@@ -213,7 +209,7 @@ $ sed -i -e "s@{{SMTP_PASS}}@${SMTP_PASS}@g" src/it-vin/values.yaml
 $ sed -i -e "s@{{VIN_NAME}}@${VIN_NAME}@g" src/it-vin/values.yaml
 $ sed -i -e "s@{{VIN_PASS}}@${VIN_PASS}@g" src/it-vin/values.yaml
 
-$ helm install --name it-vin -f src/it-vin/values.yaml src/it-vin/it-vin --namespace=it-dev
+$ helm install --name it-vin -f src/it-vin/values.yaml src/it-vin/it-vin --namespace=$NAMESPACE
 ```
 
 ## Demo

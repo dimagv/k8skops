@@ -32,7 +32,6 @@ Client Secret: xl7P4qhGNGU1xsfM47_DyVImXrj3a9_2dqvNgdadBlZfhaq0B8gBqiTAAMA68qiu
 `Dex` acts as a portal to other identity providers through "connectors." This lets dex defer authentication to LDAP servers, SAML providers, or established identity providers like GitHub, Google, and Active Directory. Clients write their authentication logic once to talk to dex, then dex handles the protocols for a given backend.
 
 ```sh
-$ DNS_ZONE=example.com
 $ DEX_ID=insurancetruck-app # random string
 $ DEX_SECRET=c2cHAtc2VjcmhhbXBsHAtc2VjcmV0ZXBsHAtZS1hhbXBsHAtc2cHAtc2VjcmV0 # random string
 $ AUTH0_DOMAIN=https://gdv.eu.auth0.com/ # slash at the end is REQUIRED
@@ -45,10 +44,10 @@ $ sed -i -e "s@{{DEX_SECRET}}@${DEX_SECRET}@g" src/dex/values.yaml
 $ sed -i -e "s@{{AUTH0_DOMAIN}}@${AUTH0_DOMAIN}@g" src/dex/values.yaml
 $ sed -i -e "s@{{AUTH0_CLIENT_ID}}@${AUTH0_CLIENT_ID}@g" src/dex/values.yaml
 $ sed -i -e "s@{{AUTH0_CLIENT_SECRET}}@${AUTH0_CLIENT_SECRET}@g" src/dex/values.yaml
-$ helm install --name dex src/dex/dex -f src/dex/values.yaml --namespace it-dev
+$ helm install --name dex src/dex/dex -f src/dex/values.yaml --namespace $NAMESPACE
 
 $ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/dex/dex-certificate.yaml
-$ kubectl apply -f src/dex/dex-certificate.yaml
+$ kubectl apply -f src/dex/dex-certificate.yaml --namespace=$NAMESPACE
 
 check https://dex.example.com/.well-known/openid-configuration # replace example.com
 ```
@@ -59,7 +58,6 @@ check https://dex.example.com/.well-known/openid-configuration # replace example
 A reverse proxy that provides authentication with Google, Github or other provider
 
 ```sh
-$ DNS_ZONE=example.com
 $ CLIENT_ID=insurancetruck-app # value from the DEX_ID (previous step)
 $ CLIENT_SECRET=c2cHAtc2VjcmhhbXBsHAtc2VjcmV0ZXBsHAtZS1hhbXBsHAtc2cHAtc2VjcmV0 # value from the DEX_SECRET (previous step)
 $ COOKIE_SECRET=d0R2lgvNVnOFWKxjulndOQ== # python -c 'import os,base64; print base64.b64encode(os.urandom(16))'
@@ -68,17 +66,16 @@ $ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/oauth2-proxy/values.yaml
 $ sed -i -e "s@{{CLIENT_ID}}@${CLIENT_ID}@g" src/oauth2-proxy/values.yaml
 $ sed -i -e "s@{{CLIENT_SECRET}}@${CLIENT_SECRET}@g" src/oauth2-proxy/values.yaml
 $ sed -i -e "s@{{COOKIE_SECRET}}@${COOKIE_SECRET}@g" src/oauth2-proxy/values.yaml
-$ helm install --name oauth2-proxy src/oauth2-proxy/oauth2-proxy -f src/oauth2-proxy/values.yaml --namespace it-dev
+$ helm install --name oauth2-proxy src/oauth2-proxy/oauth2-proxy -f src/oauth2-proxy/values.yaml --namespace $NAMESPACE
 
 $ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/oauth2-proxy/oauth2-certificate.yaml
-$ kubectl apply -f src/oauth2-proxy/oauth2-certificate.yaml
+$ kubectl apply -f src/oauth2-proxy/oauth2-certificate.yaml --namespace=$NAMESPACE
 
 check https://oauth2.example.com # replace example.com
 ```
 
 ### 4. Add Auth0 user admin rights
 ```sh
-$ DNS_ZONE=example.com
 $ AUTH0_USER_USERNAME=exampleUser # auth0 created user at step 1.7 username
 
 $ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/admin-user/clusterrolebinding.yaml

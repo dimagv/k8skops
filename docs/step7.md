@@ -3,15 +3,14 @@
 ### 1. Deploy drone
 
 ```sh
-$ DNS_ZONE=example.com
 $ GOGS_USER=gdv
 
 $ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/drone/values.yaml
 $ sed -i -e "s@{{GOGS_USER}}@${GOGS_USER}@g" src/drone/values.yaml
-$ helm install --name drone src/drone/drone -f src/drone/values.yaml --namespace it-dev
+$ helm install --name drone src/drone/drone -f src/drone/values.yaml --namespace $NAMESPACE
 
 $ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/drone/drone-certificate.yaml
-$ kubectl apply -f src/drone/drone-certificate.yaml
+$ kubectl apply -f src/drone/drone-certificate.yaml --namespace=$NAMESPACE
 
 check https://drone.example.com   
 ```
@@ -91,12 +90,14 @@ $ REGISTRY=784590408214.dkr.ecr.eu-central-1.amazonaws.com
 $ REPO=784590408214.dkr.ecr.eu-central-1.amazonaws.com/insurancetruck/backend
 $ sed -i -e "s@{{REPO}}@${REPO}@g" src/drone/.drone.backend.yml
 $ sed -i -e "s@{{REGISTRY}}@${REGISTRY}@g" src/drone/.drone.backend.yml
+$ sed -i -e "s@{{NAMESPACE}}@${NAMESPACE}@g" src/drone/.drone.backend.yml
 $ mv src/drone/.drone.backend.yml it_2.71_backend/.drone.yml
 
 # it-frontend
 $ REPO=784590408214.dkr.ecr.eu-central-1.amazonaws.com/insurancetruck/frontend
 $ sed -i -e "s@{{REPO}}@${REPO}@g" src/drone/.drone.frontend.yml
 $ sed -i -e "s@{{REGISTRY}}@${REGISTRY}@g" src/drone/.drone.frontend.yml
+$ sed -i -e "s@{{NAMESPACE}}@${NAMESPACE}@g" src/drone/.drone.frontend.yml
 $ mv src/drone/.drone.frontend.yml it_2.71_frontend/.drone.yml
 ```
 

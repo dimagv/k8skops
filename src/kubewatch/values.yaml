@@ -4,8 +4,8 @@ resourcesToWatch:
   daemonset: true
   deployment: true
   pod: true
-  replicaset: true
-  replicationcontroller: true
+  replicaset: false
+  replicationcontroller: false
   services: true
   secret: true
   configmap: true

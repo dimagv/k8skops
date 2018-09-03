@@ -12,6 +12,6 @@ pipeline:
     values: image.tag=${DRONE_COMMIT_SHA:0:8}
     prefix: DEV
     secrets: [ dev_api_server, dev_kubernetes_token ]
-    namespace: it-dev
+    namespace: {{NAMESPACE}}
     skip_tls_verify: true
     update_dependencies: true

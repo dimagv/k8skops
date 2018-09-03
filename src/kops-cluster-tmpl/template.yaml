@@ -52,23 +52,22 @@ spec:
   kubernetesVersion: 1.10.3
   masterInternalName: api.internal.{{.name}}.{{.dnsZone}}
   masterPublicName: api.{{.name}}.{{.dnsZone}}
-  networkCIDR: 172.31.0.0/16
-  networkID: {{.defaultVpcID}}
+  networkCIDR: 172.20.0.0/16
   networking:
-    kubenet: {}
+    calico: {}
   nonMasqueradeCIDR: 100.64.0.0/10
   sshAccess:
   - 0.0.0.0/0
   subnets:
-  - cidr: 172.31.128.0/19
+  - cidr: 172.20.32.0/19
     name: {{.awsRegion}}a
     type: Public
     zone: {{.awsRegion}}a
-  - cidr: 172.31.64.0/19
+  - cidr: 172.20.64.0/19
     name: {{.awsRegion}}b
     type: Public
     zone: {{.awsRegion}}b
-  - cidr: 172.31.96.0/19
+  - cidr: 172.20.96.0/19
     name: {{.awsRegion}}c
     type: Public
     zone: {{.awsRegion}}c

@@ -2,7 +2,6 @@ apiVersion: certmanager.k8s.io/v1alpha1
 kind: Certificate
 metadata:
   name: it-backend
-  namespace: it-dev
 spec:
   secretName: it-backend-tls
   issuerRef:

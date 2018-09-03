@@ -4,13 +4,11 @@
 `Kubernetes Dashboard` is a general purpose, web-based UI for Kubernetes clusters. It allows users to manage applications running in the cluster and troubleshoot them, as well as manage the cluster itself.
 
 ```sh
-$ DNS_ZONE=example.com
-
 $ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/dashboard/values.yaml
-$ helm install --name kubernetes-dashboard src/dashboard/kubernetes-dashboard -f src/dashboard/values.yaml --namespace it-dev
+$ helm install --name kubernetes-dashboard src/dashboard/kubernetes-dashboard -f src/dashboard/values.yaml --namespace $NAMESPACE
 
 $ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/dashboard/kubernetes-dashboard-certificate.yaml
-$ kubectl apply -f src/dashboard/kubernetes-dashboard-certificate.yaml
+$ kubectl apply -f src/dashboard/kubernetes-dashboard-certificate.yaml --namespace=$NAMESPACE
 
 check https://dashboard.example.com # replace example.com
 ```
@@ -23,7 +21,6 @@ $ kubectl create namespace monitoring
 $ helm repo add coreos https://s3-eu-west-1.amazonaws.com/coreos-charts/stable/
 $ helm install --name prometheus-operator --namespace=monitoring coreos/prometheus-operator
 
-$ DNS_ZONE=example.com
 $ GRAFANA_ADMIN_USER=admin # random string
 $ GRAFANA_ADMIN_PASSWORD=HeUGOIQI56Drbmm6GQ # random string
 
