@@ -10,5 +10,5 @@ resourcesToWatch:
   secret: true
   configmap: true
 slack:
-  channel: {{CHANNEL}}
+  channel: "{{CHANNEL}}"
   token: {{TOKEN}}
