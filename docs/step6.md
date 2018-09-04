@@ -21,8 +21,6 @@ $ kubectl get po -n $NAMESPACE -w
 ### 2. Import Mysql DB
 
 ```sh
-# run port-forward command in another terminal 
-$ kubectl port-forward $(kubectl get pods --selector=app=insurancetruck-db-mysql -n $NAMESPACE --output=jsonpath={.items..metadata.name}) -n $NAMESPACE 3306
 $ kubectl run mysql-client --image=mysql:5.7 -i --rm --restart=Never -- mysql -h insurancetruck-db-mysql -uroot -pdev2016 dev_insurance < src/mysql/dev_insurance.sql
 
 # test
