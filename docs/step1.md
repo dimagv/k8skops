@@ -21,9 +21,7 @@ sudo usermod -aG docker $USER
 ```sh
 {
 curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
-
 chmod +x ./kubectl
-
 sudo mv ./kubectl /usr/local/bin/kubectl
 }
 ```
@@ -34,9 +32,7 @@ sudo mv ./kubectl /usr/local/bin/kubectl
 ```sh
 {
 curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > get_helm.sh
-
 chmod 700 get_helm.sh
-
 ./get_helm.sh
 }
 ```
@@ -48,9 +44,7 @@ chmod 700 get_helm.sh
 ```sh
 {
 curl -LO https://github.com/kubernetes/kops/releases/download/$(curl -s https://api.github.com/repos/kubernetes/kops/releases/latest | grep tag_name | cut -d '"' -f 4)/kops-linux-amd64
-
 chmod +x kops-linux-amd64
-
 sudo mv kops-linux-amd64 /usr/local/bin/kops
 }
 ```
