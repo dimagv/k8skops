@@ -8,7 +8,7 @@ export DNS_ZONE=example.com
 
 ### 2. Create namespace
 ```sh
-$ kubectl create namespace $NAMESPACE
+kubectl create namespace $NAMESPACE
 ```
 
 ### 3. Helm [link](https://github.com/helm/helm)
@@ -16,18 +16,23 @@ $ kubectl create namespace $NAMESPACE
 Charts are easy to create, version, share, and publish — so start using Helm and stop the copy-and-paste madness.
 
 ```sh
-$ export HELM_HOME=$(pwd)/.helm
-$ kubectl create serviceaccount --namespace kube-system tiller
-$ kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
-$ helm init --service-account tiller
+{
+export HELM_HOME=$(pwd)/.helm
+kubectl create serviceaccount --namespace kube-system tiller
+kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
+helm init --service-account tiller
+}
 ```
 
 ### 4. Kube2iam [link](https://github.com/jtblin/kube2iam)
 Provide IAM credentials to containers running inside a kubernetes cluster based on annotations.
 
 ```sh
-$ AWS_ACCOUNT_ID=$(aws sts get-caller-identity --output text --query 'Account')
-$ helm install stable/kube2iam --namespace kube-system --name kube2iam --set=extraArgs.base-role-arn=arn:aws:iam::${AWS_ACCOUNT_ID}:role/,host.iptables=true,host.interface=cali+,rbac.create=true,verbose=true
+{
+AWS_ACCOUNT_ID=$(aws sts get-caller-identity --output text --query 'Account')
+
+helm install stable/kube2iam --namespace kube-system --name kube2iam --set=extraArgs.base-role-arn=arn:aws:iam::${AWS_ACCOUNT_ID}:role/,host.iptables=true,host.interface=cali+,rbac.create=true,verbose=true
+}
 ```
 
 ### 5. Expanding Persistent Volumes Claims [link](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#expanding-persistent-volumes-claims)
@@ -35,7 +40,7 @@ Expanding in-use PVCs is an alpha feature. To use it, enable the ExpandInUsePers
 
 ```sh
 # create resizible storage class 
-$ kubectl apply -f src/storage-class/gp2-resize-storage-class.yaml --namespace $NAMESPACE
+kubectl apply -f src/storage-class/gp2-resize-storage-class.yaml --namespace $NAMESPACE
 ```
 > Note: Expanding EBS volumes is a time consuming operation. Also, there is a per-volume quota of one modification every 6 hours.
 
@@ -43,11 +48,12 @@ $ kubectl apply -f src/storage-class/gp2-resize-storage-class.yaml --namespace $
 Starting from Kubernetes 1.8, resource usage metrics, such as container CPU and memory usage, are available in Kubernetes through the Metrics API. These metrics can be either accessed directly by user, for example by using kubectl top command, or used by a controller in the cluster, e.g. Horizontal Pod Autoscaler, to make decisions.
 
 ```sh
-$ kubectl apply -f src/metrics-server/v1.8.x.yaml
+kubectl apply -f src/metrics-server/v1.8.x.yaml
+
 # test
-$ kubectl top no
+kubectl top no
 OR
-$ kubectl get --raw /apis/metrics.k8s.io/v1beta1/nodes
+kubectl get --raw /apis/metrics.k8s.io/v1beta1/nodes
 ```
 
 ### 7. Ingress [link](https://kubernetes.io/docs/concepts/services-networking/ingress/)
@@ -55,8 +61,17 @@ An API object that manages external access to the services in a cluster, typical
 `Ingress` can provide load balancing, SSL termination and name-based virtual hosting.
 
 ```sh
-$ kubectl create namespace nginx-ingress
-$ helm install --name nginx-ingress stable/nginx-ingress --set rbac.create=true --set controller.stats.enabled=true --set controller.metrics.enabled=true --set controller.publishService.enabled=true --namespace nginx-ingress
+{
+kubectl create namespace nginx-ingress
+
+helm install stable/nginx-ingress \
+--name nginx-ingress \
+--set rbac.create=true \
+--set controller.stats.enabled=true \
+--set controller.metrics.enabled=true \
+--set controller.publishService.enabled=true \
+--namespace nginx-ingress
+}
 ```
 
 ### 8. ExternalDNS [link](https://github.com/kubernetes-incubator/external-dns)
@@ -65,31 +80,38 @@ Configure external DNS servers (AWS Route53, Google CloudDNS and others) for Kub
 
 ```sh
 # set vars
-$ vi src/external-dns/external-dns.sh 
+vi src/external-dns/external-dns.sh 
+```
+```sh
 # run script
-$ ./src/external-dns/external-dns.sh 
+./src/external-dns/external-dns.sh 
 ```
 
 ### 9. Cert-manager [link](https://github.com/jetstack/cert-manager)
 Automatically provision and manage TLS certificates in Kubernetes.
 
 ```sh
-$ helm install --name cert-manager --namespace kube-system stable/cert-manager
-
-$ EMAIL="example\@email.com" # backslash required
-$ sed -i -e "s@{{EMAIL}}@${EMAIL}@g" src/cert-manager/issuer.yaml
-$ kubectl apply -f src/cert-manager/issuer.yaml
+# cert manager
+helm install --name cert-manager --namespace kube-system stable/cert-manager
+```
+```sh
+# issuer
+{
+EMAIL="example\@email.com" # backslash required
+sed -i -e "s@{{EMAIL}}@${EMAIL}@g" src/cert-manager/issuer.yaml
+kubectl apply -f src/cert-manager/issuer.yaml
+}
 ```
 
 ### 10. Check created k8s resources
 
 ```sh
-$ helm ls
-$ kubectl get namespaces
-$ kubectl get storageclass gp2-resize
-$ kubectl get deploy metrics-server -n kube-system 
-$ kubectl get deploy external-dns -n $NAMESPACE
-$ kubectl get clusterissuer letsencrypt-prod
+helm ls
+kubectl get namespaces
+kubectl get storageclass gp2-resize
+kubectl get deploy metrics-server -n kube-system 
+kubectl get deploy external-dns -n $NAMESPACE
+kubectl get clusterissuer letsencrypt-prod
 ```
 
 ## Demo

@@ -4,31 +4,41 @@
 Docker is an open platform for developers and sysadmins to build, ship, and run distributed applications, whether on laptops, data center VMs, or the cloud.
 
 ```sh
-$ sudo apt-get install apt-transport-https ca-certificates curl software-properties-common
-$ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-$ sudo apt-key fingerprint 0EBFCD88
-$ sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-$ sudo apt-get update && sudo apt-get install docker-ce
-$ sudo groupadd docker
-$ sudo usermod -aG docker $USER
+{
+sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo apt-key fingerprint 0EBFCD88
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+sudo apt-get update && sudo apt-get install -y docker-ce
+sudo groupadd docker
+sudo usermod -aG docker $USER
+}
 # Log out and log back in so that your group membership is re-evaluated.
 ```
 
 ### Install [kubectl](https://kubernetes.io/docs/reference/kubectl/overview)
 > Kubernetes command-line tool, `kubectl`, to deploy and manage applications on Kubernetes. Using `kubectl`, you can inspect cluster resources; create, delete, and update components.
 ```sh
-$ curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
-$ chmod +x ./kubectl
-$ sudo mv ./kubectl /usr/local/bin/kubectl
+{
+curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+
+chmod +x ./kubectl
+
+sudo mv ./kubectl /usr/local/bin/kubectl
+}
 ```
 
 ### Install [helm](https://github.com/helm/helm) 
 > `Helm` helps you manage Kubernetes applications — Helm Charts helps you define, install, and upgrade even the most complex Kubernetes application.
 > Charts are easy to create, version, share, and publish — so start using `Helm` and stop the copy-and-paste madness.
 ```sh
-$ curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > get_helm.sh
-$ chmod 700 get_helm.sh
-$ ./get_helm.sh
+{
+curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > get_helm.sh
+
+chmod 700 get_helm.sh
+
+./get_helm.sh
+}
 ```
 
 ### Install [kops](https://github.com/kubernetes/kops) 
@@ -36,19 +46,69 @@ $ ./get_helm.sh
 > `kops` helps you create, destroy, upgrade and maintain production-grade, highly available, Kubernetes clusters from the command line.
 > AWS (Amazon Web Services) is currently officially supported, with GCE in beta support , and VMware vSphere in alpha, and other platforms planned.
 ```sh
-$ curl -LO https://github.com/kubernetes/kops/releases/download/$(curl -s https://api.github.com/repos/kubernetes/kops/releases/latest | grep tag_name | cut -d '"' -f 4)/kops-linux-amd64
-$ chmod +x kops-linux-amd64
-$ sudo mv kops-linux-amd64 /usr/local/bin/kops
+{
+curl -LO https://github.com/kubernetes/kops/releases/download/$(curl -s https://api.github.com/repos/kubernetes/kops/releases/latest | grep tag_name | cut -d '"' -f 4)/kops-linux-amd64
+
+chmod +x kops-linux-amd64
+
+sudo mv kops-linux-amd64 /usr/local/bin/kops
+}
 ```
+
+### Install [Pip](https://pip.pypa.io/en/stable/installing/)
+If you don't have pip, install pip with the script provided by the Python Packaging Authority.
+
+#### To install pip
+1. Download the installation script from pypa.io:
+    ```sh
+    curl -O https://bootstrap.pypa.io/get-pip.py
+    # The script downloads and installs the latest version of pip and another required package named setuptools.
+    ```
+
+2. Run the script with Python:
+    ```sh
+    python get-pip.py --user
+    ```
+
+3. Add the executable path to your PATH variable: ~/.local/bin
+    To modify your PATH variable (Linux, macOS, or Unix)
+    * Find your shell's profile script in your user folder. If you are not sure which shell you have, run echo $SHELL.
+        ```sh
+        ls -a ~
+        # .  ..  .bash_logout  .bash_profile  .bashrc  Desktop  Documents  Downloads
+        ```
+
+        * Bash – .bash_profile, .profile, or .bash_login.
+        * Zsh – .zshrc
+        * Tcsh – .tcshrc, .cshrc or .login.
+
+    * Add an export command to your profile script.
+        ```sh
+        export PATH=~/.local/bin:$PATH
+        # This command adds a path, ~/.local/bin in this example, to the current PATH variable.
+        ```
+
+    * Load the profile into your current session.
+        ```sh
+        source ~/.bash_profile
+        ```
+
+4. Verify that pip is installed correctly.
+    ```sh
+    pip --version
+    # pip 18.0 from /home/ubuntu/.local/lib/python2.7/site-packages/pip (python 2.7)
+    ```
 
 ### Install [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/awscli-install-linux.html) with [Pip](https://pip.pypa.io/en/stable/installing/)
+
 ```sh
-$ pip install awscli --upgrade --user
+pip install awscli --upgrade --user
 ```
 
-### Generate SSH key.
+Verify that the AWS CLI installed correctly.
 ```sh
-$ ssh-keygen -t rsa -N "" -f id_rsa
+aws --version
+# aws-cli/1.16.21 Python/2.7.15rc1 Linux/4.15.0-1021-aws botocore/1.12.11
 ```
 
 ### Set AWS credentials. 
@@ -61,11 +121,16 @@ $ ssh-keygen -t rsa -N "" -f id_rsa
 
 ```sh
 # configure the aws client to use your IAM user
-$ aws configure 
+aws configure 
 
 # because "aws configure" doesn't export these vars for kops to use, we export them now
 export AWS_ACCESS_KEY_ID=$(aws configure get aws_access_key_id)
 export AWS_SECRET_ACCESS_KEY=$(aws configure get aws_secret_access_key)
+```
+
+### Generate SSH key.
+```sh
+ssh-keygen -t rsa -N "" -f id_rsa
 ```
 
 ## Configure DNS ([Route53 hosted zone](https://console.aws.amazon.com/route53/home?region=eu-central-1#hosted-zones:))

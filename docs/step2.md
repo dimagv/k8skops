@@ -2,20 +2,24 @@
 
 ### Generate cluster config
 ```sh
-$ vi src/kops-cluster-tmpl/values.yaml # replace with your values
-$ kops toolbox template --values src/kops-cluster-tmpl/values.yaml --template src/kops-cluster-tmpl/template.yaml --output cluster.yaml
+vi src/kops-cluster-tmpl/values.yaml # replace with your values
+```
+```sh
+kops toolbox template --values src/kops-cluster-tmpl/values.yaml --template src/kops-cluster-tmpl/template.yaml --output cluster.yaml
 ```
 
 ### Create cluster
 ```sh
-$ export KOPS_STATE_STORE=s3://insurancetruck-k8s-ss
-$ kops create -f cluster.yaml
-$ kops update cluster insurancetruck.dimag.xyz --yes
+{
+export KOPS_STATE_STORE=s3://insurancetruck-k8s-ss
+kops create -f cluster.yaml
+kops update cluster insurancetruck.dimag.xyz --yes
+}
 ```
 
 ### Wait cluster
 ```sh
-$ watch kops validate cluster
+watch kops validate cluster
 ```
 
 **Please DO NOT MOVE ON until you have validated the cluster!**

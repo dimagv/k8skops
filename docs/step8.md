@@ -6,9 +6,11 @@ Cluster Autoscaler - a component that automatically adjusts the size of a Kubern
 
 ```sh
 # edit `cluster-autoscaler.sh` script
-$ vi src/autoscaler/cluster-autoscaler.sh
+vi src/autoscaler/cluster-autoscaler.sh
+```
+```sh
 # run `cluster-autoscaler.sh` script
-$ ./src/autoscaler/cluster-autoscaler.sh
+./src/autoscaler/cluster-autoscaler.sh
 ```
 
 ### Ark [link](https://github.com/heptio/ark)
@@ -17,23 +19,24 @@ Heptio Ark is a utility for managing disaster recovery, specifically for your Ku
 
 ```sh
 # create ark s3 bucket
-$ aws s3api create-bucket --bucket insurancetruck-ark --region eu-central-1 --create-bucket-configuration LocationConstraint=eu-central-1
+aws s3api create-bucket --bucket insurancetruck-ark --region eu-central-1 --create-bucket-configuration LocationConstraint=eu-central-1
 
 # edit `ark.sh` script
-$ vi src/ark/ark.sh
+vi src/ark/ark.sh
 # run `ark.sh` script
-$ ./src/ark/ark.sh
+./src/ark/ark.sh
 
 # install ark cli
-$ curl -LO https://github.com/heptio/ark/releases/download/$(curl -s https://api.github.com/repos/heptio/ark/releases/latest | grep tag_name | cut -d '"' -f 4)/ark-$(curl -s https://api.github.com/repos/heptio/ark/releases/latest | grep tag_name | cut -d '"' -f 4)-linux-amd64.tar.gz | tar zx
-$ sudo tar -xzvf ark-v0.9.3-linux-amd64.tar.gz -C /usr/local/bin
+curl -LO https://github.com/heptio/ark/releases/download/$(curl -s https://api.github.com/repos/heptio/ark/releases/latest | grep tag_name | cut -d '"' -f 4)/ark-$(curl -s https://api.github.com/repos/heptio/ark/releases/latest | grep tag_name | cut -d '"' -f 4)-linux-amd64.tar.gz | tar zx
+
+sudo tar -xzvf ark-v0.9.3-linux-amd64.tar.gz -C /usr/local/bin
 
 # set up a daily backup
-$ ark schedule create <SCHEDULE NAME> --schedule "0 7 * * *"
+ark schedule create <SCHEDULE NAME> --schedule "0 7 * * *"
 
 # restore
-Update the Ark server Config, setting restoreOnlyMode to true. This prevents Backup objects from being created or deleted during your Restore process.
-$ ark restore create --from-backup <SCHEDULE NAME>-<TIMESTAMP>
+ark restore create --from-backup <SCHEDULE NAME>-<TIMESTAMP>
+# Update the Ark server Config, setting restoreOnlyMode to true. This prevents Backup objects from being created or deleted during your Restore process.
 ```
 
 ### Kubewatch [link](https://github.com/bitnami-labs/kubewatch)
@@ -45,13 +48,14 @@ $ ark restore create --from-backup <SCHEDULE NAME>-<TIMESTAMP>
 3. Invite the Bot into your channel by typing: /join @name_of_your_bot in the Slack message area.
 
 ```sh
-$ CHANNEL='#it-kubewatch'
-$ TOKEN='xoxb-...'
+CHANNEL='#it-kubewatch'
+TOKEN='xoxb-...'
 
-$ sed -i -e "s@{{CHANNEL}}@${CHANNEL}@g" src/kubewatch/values.yaml
-$ sed -i -e "s@{{TOKEN}}@${TOKEN}@g" src/kubewatch/values.yaml
-
-$ helm install --name kubewatch stable/kubewatch --values=src/kubewatch/values.yaml
+{
+sed -i -e "s@{{CHANNEL}}@${CHANNEL}@g" src/kubewatch/values.yaml
+sed -i -e "s@{{TOKEN}}@${TOKEN}@g" src/kubewatch/values.yaml
+helm install --name kubewatch stable/kubewatch --values=src/kubewatch/values.yaml
+}
 ```
 
 
@@ -61,109 +65,111 @@ Kubernetes auditing provides a security-relevant chronological set of records do
 
 * Edit cluster config
 
-```sh
-$ kops edit cluster insurancetruck.example.com
-```
+    ```sh
+    kops edit cluster insurancetruck.example.com
+    ```
 
 * Add audit config
 
-```sh
-spec:
-  kubeAPIServer:
-    auditLogPath: /var/log/kube-apiserver-audit.log
-    auditLogMaxAge: 10
-    auditLogMaxBackups: 1
-    auditLogMaxSize: 100
-    auditPolicyFile: /srv/kubernetes/audit.yaml
-```
+    ```sh
+    spec:
+      kubeAPIServer:
+        auditLogPath: /var/log/kube-apiserver-audit.log
+        auditLogMaxAge: 10
+        auditLogMaxBackups: 1
+        auditLogMaxSize: 100
+        auditPolicyFile: /srv/kubernetes/audit.yaml
+    ```
 
 * Copy `audit.yaml` config to the master nodes with [fileAssets](https://github.com/kubernetes/kops/blob/master/docs/cluster_spec.md#fileassets) feature
  
-```sh
-spec:
-  fileAssets:
-    - name: audit.yaml
-      path: /srv/kubernetes/audit.yaml
-      roles: [Master]
-      content: |
-        apiVersion: audit.k8s.io/v1beta1 # This is required.
-        kind: Policy
-        # Don't generate audit events for all requests in RequestReceived stage.
-        omitStages:
-          - "RequestReceived"
-        rules:
-          # Log pod changes at RequestResponse level
-          - level: RequestResponse
-            resources:
-            - group: ""
-              # Resource "pods" doesn't match requests to any subresource of pods,
-              # which is consistent with the RBAC policy.
-              resources: ["pods"]
-          # Log "pods/log", "pods/status" at Metadata level
-          - level: Metadata
-            resources:
-            - group: ""
-              resources: ["pods/log", "pods/status"]
-
-          # Don't log requests to a configmap called "controller-leader"
-          - level: None
-            resources:
-            - group: ""
-              resources: ["configmaps"]
-              resourceNames: ["controller-leader"]
-
-          # Don't log watch requests by the "system:kube-proxy" on endpoints or services
-          - level: None
-            users: ["system:kube-proxy"]
-            verbs: ["watch"]
-            resources:
-            - group: "" # core API group
-              resources: ["endpoints", "services"]
-
-          # Don't log authenticated requests to certain non-resource URL paths.
-          - level: None
-            userGroups: ["system:authenticated"]
-            nonResourceURLs:
-            - "/api*" # Wildcard matching.
-            - "/version"
-
-          # Log the request body of configmap changes in kube-system.
-          - level: Request
-            resources:
-            - group: "" # core API group
-              resources: ["configmaps"]
-            # This rule only applies to resources in the "kube-system" namespace.
-            # The empty string "" can be used to select non-namespaced resources.
-            namespaces: ["kube-system"]
-
-          # Log configmap and secret changes in all other namespaces at the Metadata level.
-          - level: Metadata
-            resources:
-            - group: "" # core API group
-              resources: ["secrets", "configmaps"]
-
-          # Log all other resources in core and extensions at the Request level.
-          - level: Request
-            resources:
-            - group: "" # core API group
-            - group: "extensions" # Version of group should NOT be included.
-
-          # A catch-all rule to log all other requests at the Metadata level.
-          - level: Metadata
-            # Long-running requests like watches that fall under this rule will not
-            # generate an audit event in RequestReceived.
+    ```sh
+    spec:
+      fileAssets:
+        - name: audit.yaml
+          path: /srv/kubernetes/audit.yaml
+          roles: [Master]
+          content: |
+            apiVersion: audit.k8s.io/v1beta1 # This is required.
+            kind: Policy
+            # Don't generate audit events for all requests in RequestReceived stage.
             omitStages:
               - "RequestReceived"
-```
+            rules:
+              # Log pod changes at RequestResponse level
+              - level: RequestResponse
+                resources:
+                - group: ""
+                  # Resource "pods" doesn't match requests to any subresource of pods,
+                  # which is consistent with the RBAC policy.
+                  resources: ["pods"]
+              # Log "pods/log", "pods/status" at Metadata level
+              - level: Metadata
+                resources:
+                - group: ""
+                  resources: ["pods/log", "pods/status"]
+
+              # Don't log requests to a configmap called "controller-leader"
+              - level: None
+                resources:
+                - group: ""
+                  resources: ["configmaps"]
+                  resourceNames: ["controller-leader"]
+
+              # Don't log watch requests by the "system:kube-proxy" on endpoints or services
+              - level: None
+                users: ["system:kube-proxy"]
+                verbs: ["watch"]
+                resources:
+                - group: "" # core API group
+                  resources: ["endpoints", "services"]
+
+              # Don't log authenticated requests to certain non-resource URL paths.
+              - level: None
+                userGroups: ["system:authenticated"]
+                nonResourceURLs:
+                - "/api*" # Wildcard matching.
+                - "/version"
+
+              # Log the request body of configmap changes in kube-system.
+              - level: Request
+                resources:
+                - group: "" # core API group
+                  resources: ["configmaps"]
+                # This rule only applies to resources in the "kube-system" namespace.
+                # The empty string "" can be used to select non-namespaced resources.
+                namespaces: ["kube-system"]
+
+              # Log configmap and secret changes in all other namespaces at the Metadata level.
+              - level: Metadata
+                resources:
+                - group: "" # core API group
+                  resources: ["secrets", "configmaps"]
+
+              # Log all other resources in core and extensions at the Request level.
+              - level: Request
+                resources:
+                - group: "" # core API group
+                - group: "extensions" # Version of group should NOT be included.
+
+              # A catch-all rule to log all other requests at the Metadata level.
+              - level: Metadata
+                # Long-running requests like watches that fall under this rule will not
+                # generate an audit event in RequestReceived.
+                omitStages:
+                  - "RequestReceived"
+    ```
 
 * Apply changes
 
-```sh
-$ kops update cluster insurancetruck.example.com --yes
-$ kops rolling-update cluster insurancetruck.example.com --yes
-```
+    ```sh
+    kops update cluster insurancetruck.example.com --yes
+    kops rolling-update cluster insurancetruck.example.com --yes
+    ```
 
 * Check
 
-1. ssh to master
-2. cat /var/log/kube-apiserver-audit.log
+    ```sh
+    # ssh to master
+    cat /var/log/kube-apiserver-audit.log
+    ```
