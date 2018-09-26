@@ -69,7 +69,7 @@ If you don't have pip, install pip with the script provided by the Python Packag
     * Find your shell's profile script in your user folder. If you are not sure which shell you have, run echo $SHELL.
         ```sh
         ls -a ~
-        # .  ..  .bash_logout  .bash_profile  .bashrc  Desktop  Documents  Downloads
+        # .  ..  .bash_history  .bash_logout  .bashrc  .cache  .gnupg  .local  .profile  .ssh
         ```
 
         * Bash – .bash_profile, .profile, or .bash_login.
@@ -84,7 +84,7 @@ If you don't have pip, install pip with the script provided by the Python Packag
 
     * Load the profile into your current session.
         ```sh
-        source ~/.bash_profile
+        source ~/.bashrc
         ```
 
 4. Verify that pip is installed correctly.
