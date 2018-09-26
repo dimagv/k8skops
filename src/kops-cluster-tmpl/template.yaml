@@ -63,14 +63,14 @@ spec:
     name: {{.awsRegion}}a
     type: Public
     zone: {{.awsRegion}}a
-  - cidr: 172.20.64.0/19
-    name: {{.awsRegion}}b
-    type: Public
-    zone: {{.awsRegion}}b
-  - cidr: 172.20.96.0/19
-    name: {{.awsRegion}}c
-    type: Public
-    zone: {{.awsRegion}}c
+  #- cidr: 172.20.64.0/19
+  #  name: {{.awsRegion}}b
+  #  type: Public
+  #  zone: {{.awsRegion}}b
+  #- cidr: 172.20.96.0/19
+  #  name: {{.awsRegion}}c
+  #  type: Public
+  #  zone: {{.awsRegion}}c
   topology:
     dns:
       type: Public
@@ -116,8 +116,8 @@ spec:
   rootVolumeSize: {{.nodeRootVolumeSize}}
   subnets:
   - {{.awsRegion}}a
-  - {{.awsRegion}}b
-  - {{.awsRegion}}c
+  #- {{.awsRegion}}b
+  #- {{.awsRegion}}c
 
 ---
 
