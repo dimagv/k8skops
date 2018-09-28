@@ -5,6 +5,8 @@ metadata:
 spec:
   # kubelet:
   #   anonymousAuth: false
+  kubeDNS:
+    provider: CoreDNS
   additionalPolicies:
     node: |
       [
