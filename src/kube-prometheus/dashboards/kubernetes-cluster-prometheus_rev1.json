@@ -2116,7 +2116,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum(delta(kube_pod_container_status_restarts{namespace=\"kube-system\"}[30m]))",
+          "expr": "sum(delta(kube_pod_container_status_restarts_total{namespace=\"kube-system\"}[30m]))",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A"

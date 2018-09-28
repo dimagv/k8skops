@@ -116,7 +116,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(nginx_active_connections)",
+              "expr": "sum(nginx_ingress_controller_nginx_process_connections)",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "",
@@ -427,7 +427,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "avg(irate(http_request_duration_seconds_count{status_code=\"200\", method=\"GET\"}[10m]))",
+              "expr": "avg(irate(http_request_duration_milliseconds_count{statuscode=\"200\", method=\"get\"}[10m]))",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "",
@@ -505,7 +505,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "count(sum by (pod)(delta(kube_pod_container_status_restarts[15m]) > 0))",
+              "expr": "count(sum by (pod)(delta(kube_pod_container_status_restarts_total[15m]) > 0))",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{pod}}",
@@ -567,7 +567,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum by (pod)(delta(kube_pod_container_status_restarts[15m]) > 0)",
+              "expr": "sum by (pod)(delta(kube_pod_container_status_restarts_total[15m]) > 0)",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{pod}}",
@@ -1227,12 +1227,11 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "kube:cpu:top7",
+              "expr": "topk(7,sum(container_cpu_usage_seconds_total{image!=\"\"}) by (pod_name))",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 2,
               "legendFormat": "{{pod_name}}",
-              "metric": "container_cpu_usage_seconds_total",
               "refId": "A",
               "step": 4
             }
