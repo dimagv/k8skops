@@ -19,17 +19,23 @@ check https://dashboard.example.com # replace example.com
 `kube-prometheus` is a set of Kubernetes manifests, Grafana dashboards, and Prometheus rules combined with documentation and scripts to provide easy to operate end-to-end Kubernetes cluster monitoring with Prometheus using the Prometheus Operator.
 
 ```sh
+ALERTMANAGER_SLACK_API_URL=https://hooks.slack.com/services/... # https://api.slack.com/apps
+ALERTMANAGER_SLACK_CHANNEL=alertmanager
+ALERTMANAGER_SLACK_USERNAME=dimag
+GRAFANA_ADMIN_USER=admin # random string
+GRAFANA_ADMIN_PASSWORD=HeUGOIQI56Drbmm6GQ # random string
+
 {
 kubectl create namespace monitoring
 helm repo add coreos https://s3-eu-west-1.amazonaws.com/coreos-charts/stable/
 helm install --name prometheus-operator --namespace=monitoring coreos/prometheus-operator
 
-GRAFANA_ADMIN_USER=admin # random string
-GRAFANA_ADMIN_PASSWORD=HeUGOIQI56Drbmm6GQ # random string
-
 sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/kube-prometheus/values.yaml
 sed -i -e "s@{{GRAFANA_ADMIN_USER}}@${GRAFANA_ADMIN_USER}@g" src/kube-prometheus/values.yaml
 sed -i -e "s@{{GRAFANA_ADMIN_PASSWORD}}@${GRAFANA_ADMIN_PASSWORD}@g" src/kube-prometheus/values.yaml
+sed -i -e "s@{{ALERTMANAGER_SLACK_API_URL}}@${ALERTMANAGER_SLACK_API_URL}@g" src/kube-prometheus/values.yaml
+sed -i -e "s@{{ALERTMANAGER_SLACK_CHANNEL}}@${ALERTMANAGER_SLACK_CHANNEL}@g" src/kube-prometheus/values.yaml
+sed -i -e "s@{{ALERTMANAGER_SLACK_USERNAME}}@${ALERTMANAGER_SLACK_USERNAME}@g" src/kube-prometheus/values.yaml
 helm install --name kube-prometheus --namespace=monitoring -f src/kube-prometheus/values.yaml coreos/kube-prometheus
 
 sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/kube-prometheus/certs/alertmanager-certificate.yaml
