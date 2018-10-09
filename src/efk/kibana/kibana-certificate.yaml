@@ -7,10 +7,10 @@ spec:
   issuerRef:
     name: letsencrypt-prod
     kind: ClusterIssuer
-  commonName: kibana.dimag.xyz
+  commonName: kibana.{{DNS_ZONE}}
   acme:
     config:
     - http01:
         ingressClass: nginx
       domains:
-      - kibana.dimag.xyz
+      - kibana.{{DNS_ZONE}}

@@ -29,7 +29,10 @@ helm install src/efk/fluent-bit/fluent-bit --name=fluent-bit --namespace=logging
 
 ```sh
 {
+sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/efk/kibana/values.yaml
 helm install stable/kibana --name=kibana --namespace=logging -f src/efk/kibana/values.yaml
+
+sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/efk/kibana/kibana-certificate.yaml
 kubectl apply -f src/efk/kibana/kibana-certificate.yaml --namespace=logging
 }
 ```
