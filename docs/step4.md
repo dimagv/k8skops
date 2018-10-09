@@ -1,3 +1,5 @@
+###### [Step 3](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step3.md)
+
 #### Step 3. [Configure cluster](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step3.md)
 
 # Step 4. AuthN and AuthZ

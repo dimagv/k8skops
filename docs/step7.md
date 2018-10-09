@@ -1,3 +1,5 @@
+###### [Step 6](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step6.md)
+
 # Step 7. Insurancetruck App
 
 ### 1. Mysql [link](https://www.mysql.com/)

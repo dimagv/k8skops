@@ -1,3 +1,5 @@
+###### [Step 8](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step8.md)
+
 # Step 9. Additionally
 
 ### Autoscaler [link](https://github.com/kubernetes/kops/tree/master/addons/cluster-autoscaler)
