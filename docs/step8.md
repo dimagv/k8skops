@@ -1,4 +1,4 @@
-###### [Step 7](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step7.md)
+###### [Back](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step7.md)
 
 # Step 8. Drone.io (CI/CD)
 
