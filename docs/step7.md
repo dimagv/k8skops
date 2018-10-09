@@ -1,171 +1,239 @@
-# Step 7. Drone.io (CI/CD)
+# Step 7. Insurancetruck App
 
-### 1. Deploy drone
-
-```sh
-{
-GOGS_USER=gdv
-
-sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/drone/values.yaml
-sed -i -e "s@{{GOGS_USER}}@${GOGS_USER}@g" src/drone/values.yaml
-helm install --name drone src/drone/drone -f src/drone/values.yaml --namespace $NAMESPACE
-
-sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/drone/drone-certificate.yaml
-kubectl apply -f src/drone/drone-certificate.yaml --namespace=$NAMESPACE
-}
-
-check https://drone.example.com   
-```
-
-### 2. Create test repos
-
-* Create 2 test repos in GOGS (`it-backend-test` and `it-frontend-test`)
-
-### 3. Configure drone
-
-1. Open https://drone.example.com
-2. Sign in as $GOGS_USER
-3. Activate **TEST** repos (`it-backend-test` and `it-frontend-test`). **DON'T ACTIVATE REAL REPOS**. It will replace existing webhook with drone's webhook
-4. Get drone api token https://drone.example.com/account/token
-
-### 4. Create drone service account
+### 1. Mysql [link](https://www.mysql.com/)
 
 ```sh
 {
-kubectl create serviceaccount --namespace kube-system drone
-kubectl create clusterrolebinding drone-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:drone
+MYSQL_ROOT_PASS=dev2016
+MYSQL_USER=dev
+MYSQL_PASS=dev2016
+MYSQL_DB=dev_insurance
+
+sed -i -e "s@{{MYSQL_ROOT_PASS}}@${MYSQL_ROOT_PASS}@g" src/mysql/values.yaml
+sed -i -e "s@{{MYSQL_USER}}@${MYSQL_USER}@g" src/mysql/values.yaml
+sed -i -e "s@{{MYSQL_PASS}}@${MYSQL_PASS}@g" src/mysql/values.yaml
+sed -i -e "s@{{MYSQL_DB}}@${MYSQL_DB}@g" src/mysql/values.yaml
+helm install --name insurancetruck-db -f src/mysql/values.yaml stable/mysql --namespace $NAMESPACE
 }
+
+# wait some time
+kubectl get po -n $NAMESPACE -w
 ```
 
-### 5. Set drone secrets
+### 2. Import Mysql DB
 
 ```sh
-DRONE_SERVER=https://drone.example.com
-DRONE_TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZXh0IjoiZ2R2IiwidHlwZSI6InVzZXIifQ.k0mJdool0CJhmM5MihuYWxx36AQmbMh_n_w2fbE7kpY
-AWS_ACCESS_KEY_ID=
-AWS_SECRET_ACCESS_KEY=
-DRONE_SA_TOKEN=$(kubectl -n kube-system get secret $(kubectl -n kube-system get secret | grep drone | awk '{print $1}') -o yaml | grep "token:" | awk '{print $2}' | base64 -d)
-K8S_API_SERVER=https://api.insurancetruck.example.com
+kubectl run mysql-client --image=mysql:5.7 -i --rm --restart=Never -- mysql -h insurancetruck-db-mysql -uroot -pdev2016 dev_insurance < src/mysql/dev_insurance.sql
 
+# test
+kubectl run mysql-client --image=mysql:5.7 -it --rm --restart=Never -- mysql -h insurancetruck-db-mysql -uroot -pdev2016 dev_insurance -e 'SHOW TABLES;'
+```
+
+### 3. phpMyAdmin [link](https://www.phpmyadmin.net/)
+
+```sh
 {
-# it-backend-test
-BACKEND_REPO=ironjab/it-backend-test
+sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/pma/values.yaml
+helm install --name insurancetruck-pma -f src/pma/values.yaml stable/phpmyadmin --namespace $NAMESPACE
 
-docker run --env="DRONE_SERVER=$DRONE_SERVER" --env="DRONE_TOKEN=$DRONE_TOKEN" drone/cli secret add -repository $BACKEND_REPO -image quay.io/ipedrazas/drone-helm -name dev_api_server -value $K8S_API_SERVER
-
-docker run --env="DRONE_SERVER=$DRONE_SERVER" --env="DRONE_TOKEN=$DRONE_TOKEN" drone/cli secret add -repository $BACKEND_REPO -image quay.io/ipedrazas/drone-helm -name dev_kubernetes_token -value $DRONE_SA_TOKEN
-
-docker run --env="DRONE_SERVER=$DRONE_SERVER" --env="DRONE_TOKEN=$DRONE_TOKEN" drone/cli secret add -repository $BACKEND_REPO -image plugins/ecr -name ecr_access_key -value $AWS_ACCESS_KEY_ID
-
-docker run --env="DRONE_SERVER=$DRONE_SERVER" --env="DRONE_TOKEN=$DRONE_TOKEN" drone/cli secret add -repository $BACKEND_REPO -image plugins/ecr -name ecr_secret_key -value $AWS_SECRET_ACCESS_KEY
-
-docker run --env="DRONE_SERVER=$DRONE_SERVER" --env="DRONE_TOKEN=$DRONE_TOKEN" drone/cli secret add -repository $BACKEND_REPO -image plugins/ecr -name ecr_region -value eu-central-1
+sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/pma/pma-certificate.yaml
+kubectl apply -f src/pma/pma-certificate.yaml --namespace=$NAMESPACE
 }
 
+check https://pma.example.com # replace example.com
+```
+
+### 4. Deploy `it_2.71_backend` [link](http://54.152.51.78:10080/ironjab/it_2.71_backend)
+
+#### 4.1. Create AWS ECR repo
+
+```sh
+aws ecr create-repository --repository-name insurancetruck/backend
+
+Output:
+{                                                 
+    "repository": {                               
+        "repositoryArn": "arn:aws:ecr:eu-central-1:784590408214:repository/insurancetruck/backend",  
+        "registryId": "784590408214",             
+        "repositoryName": "insurancetruck/backend",                                                  
+        "repositoryUri": "784590408214.dkr.ecr.eu-central-1.amazonaws.com/insurancetruck/backend",   
+        "createdAt": 1534613601.0                 
+    }                                             
+}     
+```
+
+#### 4.2. Build docker image
+
+```sh
+git clone ssh://git@54.152.51.78:10022/ironjab/it_2.71_backend.git
+
+docker build -t 784590408214.dkr.ecr.eu-central-1.amazonaws.com/insurancetruck/backend:latest it_2.71_backend
+```
+
+#### 4.3. Push docker image
+
+```sh
+# retrieve the login command to use to authenticate your Docker client to your registry.
+$(aws ecr get-login --no-include-email --region eu-central-1)
+
+docker push 784590408214.dkr.ecr.eu-central-1.amazonaws.com/insurancetruck/backend:latest
+```
+
+#### 4.4. Deploy helm chart
+
+```sh
 {
-# it-frontend-test
-FRONTEND_REPO=ironjab/it-frontend-test
+REPO=784590408214.dkr.ecr.eu-central-1.amazonaws.com/insurancetruck/backend
+MYSQL_ROOT_PASS=dev2016
+MYSQL_USER=dev
+MYSQL_PASS=dev2016
+MYSQL_DB=dev_insurance
+REDIS_PASS=dev2016
 
-docker run --env="DRONE_SERVER=$DRONE_SERVER" --env="DRONE_TOKEN=$DRONE_TOKEN" drone/cli secret add -repository $FRONTEND_REPO -image quay.io/ipedrazas/drone-helm -name dev_api_server -value $K8S_API_SERVER
+sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/it-backend/values.yaml
+sed -i -e "s@{{REPO}}@${REPO}@g" src/it-backend/values.yaml
+sed -i -e "s@{{MYSQL_ROOT_PASS}}@${MYSQL_ROOT_PASS}@g" src/it-backend/values.yaml
+sed -i -e "s@{{MYSQL_USER}}@${MYSQL_USER}@g" src/it-backend/values.yaml
+sed -i -e "s@{{MYSQL_PASS}}@${MYSQL_PASS}@g" src/it-backend/values.yaml
+sed -i -e "s@{{MYSQL_DB}}@${MYSQL_DB}@g" src/it-backend/values.yaml
+sed -i -e "s@{{REDIS_PASS}}@${REDIS_PASS}@g" src/it-backend/values.yaml
+helm install --name it-backend -f src/it-backend/values.yaml src/it-backend/it-backend --namespace=$NAMESPACE
 
-docker run --env="DRONE_SERVER=$DRONE_SERVER" --env="DRONE_TOKEN=$DRONE_TOKEN" drone/cli secret add -repository $FRONTEND_REPO -image quay.io/ipedrazas/drone-helm -name dev_kubernetes_token -value $DRONE_SA_TOKEN
+sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/it-backend/it-backend-certificate.yaml
+kubectl apply -f src/it-backend/it-backend-certificate.yaml --namespace=$NAMESPACE
+}
 
-docker run --env="DRONE_SERVER=$DRONE_SERVER" --env="DRONE_TOKEN=$DRONE_TOKEN" drone/cli secret add -repository $FRONTEND_REPO -image plugins/ecr -name ecr_access_key -value $AWS_ACCESS_KEY_ID
+check https://it-backend.example.com # replace example.com
+```
 
-docker run --env="DRONE_SERVER=$DRONE_SERVER" --env="DRONE_TOKEN=$DRONE_TOKEN" drone/cli secret add -repository $FRONTEND_REPO -image plugins/ecr -name ecr_secret_key -value $AWS_SECRET_ACCESS_KEY
+### 5. Deploy `it_2.71_frontend` [link](http://54.152.51.78:10080/ironjab/it_2.71_frontend)
 
-docker run --env="DRONE_SERVER=$DRONE_SERVER" --env="DRONE_TOKEN=$DRONE_TOKEN" drone/cli secret add -repository $FRONTEND_REPO -image plugins/ecr -name ecr_region -value eu-central-1
+#### 5.1. Create AWS ECR repo
+```sh
+aws ecr create-repository --repository-name insurancetruck/frontend
+
+Output:
+{
+    "repository": {
+        "repositoryArn": "arn:aws:ecr:eu-central-1:784590408214:repository/insurancetruck/frontend",
+        "registryId": "784590408214",
+        "repositoryName": "insurancetruck/frontend",
+        "repositoryUri": "784590408214.dkr.ecr.eu-central-1.amazonaws.com/insurancetruck/frontend",
+        "createdAt": 1534620051.0
+    }
 }
 ```
 
-### 6. Configure test repos
+#### 5.2. Build docker image
 
-* Clone `it_2.71_backend` and `it_2.71_frontend`
+```sh
+git clone ssh://git@54.152.51.78:10022/ironjab/it_2.71_frontend
 
-    ```sh
-    {
-    # it-backend
-    git clone ssh://git@54.152.51.78:10022/ironjab/it_2.71_backend.git
+cd it_2.71_frontend
+vi webpack.prod.config.js # change `process.env.API_URL` => https://it-backend.example.com
+chmod +x docker-build.sh && ./docker-build.sh # install nodejs+yarn before
+docker build -t 784590408214.dkr.ecr.eu-central-1.amazonaws.com/insurancetruck/frontend:latest .
+cd ..
+```
 
-    # it-frontend
-    git clone ssh://git@54.152.51.78:10022/ironjab/it_2.71_frontend.git
-    }
-    ```
+#### 5.3. Push docker image
 
-* Change remote repository URL to break nothing in the working app
+```sh
+# retrieve the login command to use to authenticate your Docker client to your registry.
+$(aws ecr get-login --no-include-email --region eu-central-1)
 
-    ```sh
-    {
-    # it-backend
-    cd it_2.71_backend && git remote set-url origin http://54.152.51.78:10080/ironjab/it-backend-test.git && cd ..
+docker push 784590408214.dkr.ecr.eu-central-1.amazonaws.com/insurancetruck/frontend:latest
+```
 
-    # it-frontend
-    cd it_2.71_frontend && git remote set-url origin http://54.152.51.78:10080/ironjab/it-frontend-test.git && cd ..
-    }
-    ```
+#### 5.4. Deploy helm chart
 
-* Configure .drone.yaml
+```sh
+{
+REPO=784590408214.dkr.ecr.eu-central-1.amazonaws.com/insurancetruck/frontend
 
-    ```sh
-    REGISTRY=784590408214.dkr.ecr.eu-central-1.amazonaws.com
+sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/it-frontend/values.yaml
+sed -i -e "s@{{REPO}}@${REPO}@g" src/it-frontend/values.yaml
+helm install --name it-frontend -f src/it-frontend/values.yaml src/it-frontend/it-frontend --namespace=$NAMESPACE
 
-    {
-    # it-backend
-    REPO=784590408214.dkr.ecr.eu-central-1.amazonaws.com/insurancetruck/backend
-    sed -i -e "s@{{REPO}}@${REPO}@g" src/drone/.drone.backend.yml
-    sed -i -e "s@{{REGISTRY}}@${REGISTRY}@g" src/drone/.drone.backend.yml
-    sed -i -e "s@{{NAMESPACE}}@${NAMESPACE}@g" src/drone/.drone.backend.yml
-    mv src/drone/.drone.backend.yml it_2.71_backend/.drone.yml
-    }
+sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/it-frontend/it-frontend-certificate.yaml
+kubectl apply -f src/it-frontend/it-frontend-certificate.yaml --namespace=$NAMESPACE
+}
 
-    {
-    # it-frontend
-    REPO=784590408214.dkr.ecr.eu-central-1.amazonaws.com/insurancetruck/frontend
-    sed -i -e "s@{{REPO}}@${REPO}@g" src/drone/.drone.frontend.yml
-    sed -i -e "s@{{REGISTRY}}@${REGISTRY}@g" src/drone/.drone.frontend.yml
-    sed -i -e "s@{{NAMESPACE}}@${NAMESPACE}@g" src/drone/.drone.frontend.yml
-    mv src/drone/.drone.frontend.yml it_2.71_frontend/.drone.yml
-    }
-    ```
+check https://it-frontend.example.com # replace example.com
+```
 
-* Configure helm charts
+### 6. Deploy `service_vin` [link](http://54.152.51.78:10080/ironjab/service_vin)
 
-    ```sh
-    {
-    # it-backend
-    cp -r src/it-backend/it-backend it_2.71_backend/helm
-    cp src/it-backend/values.yaml it_2.71_backend/helm # values.yaml should be configured from the previous step6
-    cd it_2.71_backend 
-    git add . && git commit -m "add ci/cd" && git push origin master
-    cd ..
-    }
+#### 6.1. Create AWS ECR repo
 
-    {
-    # it-frontend
-    vi it_2.71_frontend/webpack.prod.config.js # change `process.env.API_URL` => https://it-backend.example.com
-    cp -r src/it-frontend/it-frontend it_2.71_frontend/helm
-    cp src/it-frontend/values.yaml it_2.71_frontend/helm # values.yaml should be configured from the previous step6
-    cd it_2.71_frontend
-    git add . && git commit -m "add ci/cd" && git push origin master
-    cd ..
-    }
-    ```
+```sh
+aws ecr create-repository --repository-name insurancetruck/vin
 
-* Check
+Output:
+{                                                 
+    "repository": {                               
+        "repositoryArn": "arn:aws:ecr:eu-central-1:784590408214:repository/insurancetruck/vin",      
+        "registryId": "784590408214",             
+        "repositoryName": "insurancetruck/vin",   
+        "repositoryUri": "784590408214.dkr.ecr.eu-central-1.amazonaws.com/insurancetruck/vin",       
+        "createdAt": 1535728891.0                 
+    }                                             
+}    
+```
 
-    ```sh
-    # should see running builds
-    open https://drone.example.com/ironjab/ 
-    
-    helm ls
-    ```
+#### 6.2. Build docker image
+
+```sh
+git clone ssh://git@54.152.51.78:10022/ironjab/service_vin.git
+
+docker build -t 784590408214.dkr.ecr.eu-central-1.amazonaws.com/insurancetruck/vin:latest service_vin
+```
+
+#### 6.3. Push docker image
+
+```sh
+# retrieve the login command to use to authenticate your Docker client to your registry.
+$(aws ecr get-login --no-include-email --region eu-central-1)
+
+docker push 784590408214.dkr.ecr.eu-central-1.amazonaws.com/insurancetruck/vin:latest
+```
+
+#### 6.4. Deploy helm chart
+
+```sh
+{
+REPO=784590408214.dkr.ecr.eu-central-1.amazonaws.com/insurancetruck/vin
+MYSQL_ROOT_PASS=dev2016
+MYSQL_USER=dev
+MYSQL_PASS=dev2016
+MYSQL_DB=dev_insurance
+SMTP_NAME=AKIAI6HQ75CCY3NW7KFQ
+SMTP_PASS=Aj5Zi7yFWBYJF/td/D+C7XThyR5duFZkFXcHuTwGpdsN
+VIN_NAME=perealuc
+VIN_PASS="Dec2014!"
+
+sed -i -e "s@{{REPO}}@${REPO}@g" src/it-vin/values.yaml
+sed -i -e "s@{{MYSQL_ROOT_PASS}}@${MYSQL_ROOT_PASS}@g" src/it-vin/values.yaml
+sed -i -e "s@{{MYSQL_USER}}@${MYSQL_USER}@g" src/it-vin/values.yaml
+sed -i -e "s@{{MYSQL_PASS}}@${MYSQL_PASS}@g" src/it-vin/values.yaml
+sed -i -e "s@{{MYSQL_DB}}@${MYSQL_DB}@g" src/it-vin/values.yaml
+sed -i -e "s@{{SMTP_NAME}}@${SMTP_NAME}@g" src/it-vin/values.yaml
+sed -i -e "s@{{SMTP_PASS}}@${SMTP_PASS}@g" src/it-vin/values.yaml
+sed -i -e "s@{{VIN_NAME}}@${VIN_NAME}@g" src/it-vin/values.yaml
+sed -i -e "s@{{VIN_PASS}}@${VIN_PASS}@g" src/it-vin/values.yaml
+
+helm install --name it-vin -f src/it-vin/values.yaml src/it-vin/it-vin --namespace=$NAMESPACE
+}
+```
 
 ## Demo
 
 <p align="center">
-  <a target="_blank" href="https://asciinema.org/a/197077">
-  <img src="https://asciinema.org/a/197077.png" width="885"></image>
+  <a target="_blank" href="https://asciinema.org/a/197051">
+  <img src="https://asciinema.org/a/197051.png" width="885"></image>
   </a>
 </p>
 
-### Step 8. [Additionally](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step8.md)
+# What's next?
+
+### Step 8. [Drone.io (CI/CD)](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step8.md)

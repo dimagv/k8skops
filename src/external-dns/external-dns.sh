@@ -44,7 +44,7 @@ then
   printf " ✅  Policy already exists\n"
 else
   printf " ✅  Policy does not yet exist, creating now.\n"
-  aws iam create-role --role-name k8s-external-dns --assume-role-policy-document file://trust-policy.json
+  ROLE_ARN=$(aws iam create-role --role-name k8s-external-dns --assume-role-policy-document file://trust-policy.json)
   printf " ✅ \n"
 fi
 

@@ -1,0 +1,19 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    prometheus: kube-prometheus
+  name: elasticsearch
+  namespace: monitoring
+spec:
+  endpoints:
+  - interval: 30s
+    port: http
+  jobLabel: elasticsearch
+  namespaceSelector:
+    matchNames:
+    - logging
+  selector:
+    matchLabels:
+      app: elasticsearch-exporter
+      chart: elasticsearch-exporter-0.4.0

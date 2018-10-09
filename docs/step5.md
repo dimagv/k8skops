@@ -42,6 +42,9 @@ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/kube-prometheus/certs/alertmanager-
 sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/kube-prometheus/certs/grafana-certificate.yaml
 sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/kube-prometheus/certs/prometheus-certificate.yaml
 kubectl apply -f src/kube-prometheus/certs
+
+# service-monitors
+kubectl apply -f src/kube-prometheus/service-monitors
 }
 
 check https://alertmanager.example.com # replace example.com
@@ -59,4 +62,4 @@ check https://prometheus.example.com # replace example.com
 
 # What's next?
 
-### Step 6. [Insurancetruck App](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step6.md)
+### Step 6. [Logging](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step6.md)

@@ -1,3 +1,5 @@
+#### [Back to Step 2](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step2.md)
+
 # Step 3. Configure cluster
 
 ### 1. Set common environment variables
@@ -30,7 +32,6 @@ Provide IAM credentials to containers running inside a kubernetes cluster based 
 ```sh
 {
 AWS_ACCOUNT_ID=$(aws sts get-caller-identity --output text --query 'Account')
-
 helm install stable/kube2iam --namespace kube-system --name kube2iam --set=extraArgs.base-role-arn=arn:aws:iam::${AWS_ACCOUNT_ID}:role/,host.iptables=true,host.interface=cali+,rbac.create=true,verbose=true
 }
 ```
@@ -51,8 +52,6 @@ Starting from Kubernetes 1.8, resource usage metrics, such as container CPU and 
 kubectl apply -f src/metrics-server/v1.8.x.yaml
 
 # test
-kubectl top no
-OR
 kubectl get --raw /apis/metrics.k8s.io/v1beta1/nodes
 ```
 
@@ -70,6 +69,7 @@ helm install stable/nginx-ingress \
 --set controller.stats.enabled=true \
 --set controller.metrics.enabled=true \
 --set controller.publishService.enabled=true \
+--set controller.podAnnotations."fluentbit\.io/parser"=nginx-ingress \
 --namespace nginx-ingress
 }
 ```

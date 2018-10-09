@@ -1,0 +1,20 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    prometheus: kube-prometheus
+  name: fluentbit
+  namespace: monitoring
+spec:
+  endpoints:
+  - interval: 30s
+    port: metrics
+    path: /api/v1/metrics/prometheus
+  jobLabel: fluentbit
+  namespaceSelector:
+    matchNames:
+    - logging
+  selector:
+    matchLabels:
+      app: fluent-bit-fluent-bit
+      chart: fluent-bit-0.12.0
