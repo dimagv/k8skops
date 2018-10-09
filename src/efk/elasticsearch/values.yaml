@@ -28,7 +28,7 @@ cluster:
 
 client:
   name: client
-  replicas: 1
+  replicas: 2
   serviceType: ClusterIP    
   loadBalancerIP: {}
   loadBalancerSourceRanges: {}
@@ -51,7 +51,7 @@ client:
   # podAnnotations:
   #   example: client-foo
   podDisruptionBudget:
-    enabled: false
+    enabled: true
     minAvailable: 1
     # maxUnavailable: 1
 
@@ -90,7 +90,7 @@ master:
 data:
   name: data
   exposeHttp: false
-  replicas: 1
+  replicas: 2
   heapSize: "1536m"
   persistence:
     enabled: true
@@ -114,7 +114,7 @@ data:
   # podAnnotations:
   #   example: data-foo
   podDisruptionBudget:
-    enabled: false
+    enabled: true
     # minAvailable: 1
     maxUnavailable: 1
   updateStrategy:
