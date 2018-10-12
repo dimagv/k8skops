@@ -5,13 +5,14 @@ awsRegion: eu-central-1
 s3bucket: insurancetruck-k8s-ss
 masterImage: ami-7c412f13
 masterMachineType: t2.medium
+multiMaster: false
 masterMaxSize: 1
-masterMinSize: 1
+masterMinSize: 1 # multiMaster = true => 1 * 3 subnets = 3 nodes; multiMaster = false => 1 * 1 subnet = 1 node
 masterRootVolumeSize: 50
 nodeImage: ami-7c412f13
 nodeMachineType: t2.medium
-nodeMaxSize: 2
-nodeMixSize: 2
+nodeMaxSize: 3
+nodeMixSize: 1 # 1 * 3 subnets = 3 nodes
 nodeRootVolumeSize: 50
 publicKey: |
   ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7xqw5xMZt+WsMczrXJ3YERmkcCXGFOuEytc+zkCS336umPMtwxpOrHYS2SglWbwsRHAZvHfYRcN19pXf3TV836oxsi0I6C4ARi64Gn3EQupdQ2w8okx8bdjxzeeYInLbbb9Qus7AwMMlu+ruJsOkkOhaVaDfvFmrTND5DjegRYvBsHHx1dlGvK4zZnbed8bB1lxpmevGmDsQjqYKZiyV8Ns6GwJMq5IbOPktoSbJ+LrCUzsAW/4caDKO9EHvK6aPza+DZaRQa6lJ9H9NybFPJMWHC3KHq7MiF3GQLCqUNaKe+s7SVF0lT0eKKYmvTLWHJY43cl6BlYRI8Mc5HjXe9 dimag@xps

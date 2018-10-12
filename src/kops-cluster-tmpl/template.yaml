@@ -3,10 +3,10 @@ kind: Cluster
 metadata:
   name: {{.name}}.{{.dnsZone}}
 spec:
-  # kubelet:
-  #   anonymousAuth: false
-  kubeDNS:
-    provider: CoreDNS
+  kubelet:
+    anonymousAuth: false
+  # kubeDNS:
+  #   provider: CoreDNS
   additionalPolicies:
     node: |
       [
@@ -41,6 +41,7 @@ spec:
     allowContainerRegistry: true
     legacy: false
   kubeAPIServer:
+    anonymousAuth: false
     featureGates:
       ExpandPersistentVolumes: "true"
     oidcClientID: insurancetruck-app
@@ -65,14 +66,14 @@ spec:
     name: {{.awsRegion}}a
     type: Public
     zone: {{.awsRegion}}a
-  #- cidr: 172.20.64.0/19
-  #  name: {{.awsRegion}}b
-  #  type: Public
-  #  zone: {{.awsRegion}}b
-  #- cidr: 172.20.96.0/19
-  #  name: {{.awsRegion}}c
-  #  type: Public
-  #  zone: {{.awsRegion}}c
+  - cidr: 172.20.64.0/19
+    name: {{.awsRegion}}b
+    type: Public
+    zone: {{.awsRegion}}b
+  - cidr: 172.20.96.0/19
+    name: {{.awsRegion}}c
+    type: Public
+    zone: {{.awsRegion}}c
   topology:
     dns:
       type: Public
@@ -101,25 +102,111 @@ spec:
 
 ---
 
+{{if .multiMaster}}
+
 apiVersion: kops/v1alpha2
 kind: InstanceGroup
 metadata:
   labels:
     kops.k8s.io/cluster: {{.name}}.{{.dnsZone}}
-  name: nodes
+  name: master-{{.awsRegion}}b
+spec:
+  image: {{.masterImage}}
+  machineType: {{.masterMachineType}}
+  maxSize: {{.masterMaxSize}}
+  minSize: {{.masterMinSize}}
+  nodeLabels:
+    kops.k8s.io/instancegroup: master-{{.awsRegion}}b
+  role: Master
+  rootVolumeSize: {{.masterRootVolumeSize}}
+  subnets:
+  - {{.awsRegion}}b
+
+{{end}}
+
+---
+
+{{if .multiMaster}}
+
+apiVersion: kops/v1alpha2
+kind: InstanceGroup
+metadata:
+  labels:
+    kops.k8s.io/cluster: {{.name}}.{{.dnsZone}}
+  name: master-{{.awsRegion}}c
+spec:
+  image: {{.masterImage}}
+  machineType: {{.masterMachineType}}
+  maxSize: {{.masterMaxSize}}
+  minSize: {{.masterMinSize}}
+  nodeLabels:
+    kops.k8s.io/instancegroup: master-{{.awsRegion}}c
+  role: Master
+  rootVolumeSize: {{.masterRootVolumeSize}}
+  subnets:
+  - {{.awsRegion}}c
+
+{{end}}
+
+---
+
+apiVersion: kops/v1alpha2
+kind: InstanceGroup
+metadata:
+  labels:
+    kops.k8s.io/cluster: {{.name}}.{{.dnsZone}}
+  name: nodes-{{.awsRegion}}a
 spec:
   image: {{.nodeImage}}
   machineType: {{.nodeMachineType}}
   maxSize: {{.nodeMaxSize}}
   minSize: {{.nodeMixSize}}
   nodeLabels:
-    kops.k8s.io/instancegroup: nodes
+    kops.k8s.io/instancegroup: nodes-{{.awsRegion}}a
   role: Node
   rootVolumeSize: {{.nodeRootVolumeSize}}
   subnets:
   - {{.awsRegion}}a
-  #- {{.awsRegion}}b
-  #- {{.awsRegion}}c
+
+---
+
+apiVersion: kops/v1alpha2
+kind: InstanceGroup
+metadata:
+  labels:
+    kops.k8s.io/cluster: {{.name}}.{{.dnsZone}}
+  name: nodes-{{.awsRegion}}b
+spec:
+  image: {{.nodeImage}}
+  machineType: {{.nodeMachineType}}
+  maxSize: {{.nodeMaxSize}}
+  minSize: {{.nodeMixSize}}
+  nodeLabels:
+    kops.k8s.io/instancegroup: nodes-{{.awsRegion}}b
+  role: Node
+  rootVolumeSize: {{.nodeRootVolumeSize}}
+  subnets:
+  - {{.awsRegion}}b
+
+---
+
+apiVersion: kops/v1alpha2
+kind: InstanceGroup
+metadata:
+  labels:
+    kops.k8s.io/cluster: {{.name}}.{{.dnsZone}}
+  name: nodes-{{.awsRegion}}c
+spec:
+  image: {{.nodeImage}}
+  machineType: {{.nodeMachineType}}
+  maxSize: {{.nodeMaxSize}}
+  minSize: {{.nodeMixSize}}
+  nodeLabels:
+    kops.k8s.io/instancegroup: nodes-{{.awsRegion}}c
+  role: Node
+  rootVolumeSize: {{.nodeRootVolumeSize}}
+  subnets:
+  - {{.awsRegion}}c
 
 ---
 
