@@ -5,8 +5,7 @@ metadata:
 spec:
   kubelet:
     anonymousAuth: false
-  # kubeDNS:
-  #   provider: CoreDNS
+    authenticationTokenWebhook: true
   additionalPolicies:
     node: |
       [
@@ -100,10 +99,8 @@ spec:
   subnets:
   - {{.awsRegion}}a
 
----
-
 {{if .multiMaster}}
-
+---
 apiVersion: kops/v1alpha2
 kind: InstanceGroup
 metadata:
@@ -123,11 +120,8 @@ spec:
   - {{.awsRegion}}b
 
 {{end}}
-
----
-
 {{if .multiMaster}}
-
+---
 apiVersion: kops/v1alpha2
 kind: InstanceGroup
 metadata:
@@ -147,7 +141,6 @@ spec:
   - {{.awsRegion}}c
 
 {{end}}
-
 ---
 
 apiVersion: kops/v1alpha2
