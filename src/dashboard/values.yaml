@@ -17,7 +17,7 @@ ingress:
         - dashboard.{{DNS_ZONE}}
 rbac:
   create: true
-  clusterAdminRole: true # https://github.com/helm/charts/issues/5493
+  clusterAdminRole: false
 serviceAccount:
   create: true
   name:

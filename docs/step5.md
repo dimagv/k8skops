@@ -8,10 +8,10 @@
 ```sh
 {
 sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/dashboard/values.yaml
-helm install --name kubernetes-dashboard src/dashboard/kubernetes-dashboard -f src/dashboard/values.yaml --namespace $NAMESPACE
+helm install --name kubernetes-dashboard src/dashboard/kubernetes-dashboard -f src/dashboard/values.yaml --namespace=kube-system
 
 sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/dashboard/kubernetes-dashboard-certificate.yaml
-kubectl apply -f src/dashboard/kubernetes-dashboard-certificate.yaml --namespace=$NAMESPACE
+kubectl apply -f src/dashboard/kubernetes-dashboard-certificate.yaml --namespace=kube-system
 }
 
 check https://dashboard.example.com # replace example.com
