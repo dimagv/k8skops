@@ -77,6 +77,7 @@ Kubernetes auditing provides a security-relevant chronological set of records do
     spec:
       kubeAPIServer:
         auditLogPath: /var/log/kube-apiserver-audit.log
+        auditLogFormat: json
         auditLogMaxAge: 10
         auditLogMaxBackups: 1
         auditLogMaxSize: 100
