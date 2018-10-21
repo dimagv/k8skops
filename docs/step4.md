@@ -8,6 +8,7 @@ Universal authentication & authorization platform for web, mobile, and legacy ap
 1. Sign Up [link](https://auth0.com/signup?&signUpData=%7B%22category%22%3A%22button%22%7D)
 2. Create new application (`Regular Web Applications` Type) [link](https://manage.auth0.com/#/applications)
 3. Set `Allowed Callback URLs` (App Settings Tab)
+    
     ```sh
     https://dex.example.com/callback # replace example.com
     http://127.0.0.1:5555/callback
@@ -22,6 +23,7 @@ Universal authentication & authorization platform for web, mobile, and legacy ap
 9. Add `Auth0 Authorization` extension [link](https://manage.auth0.com/#/extensions)
 10. Create `admins` and `developers` groups and add users to them
 11. Create `add-groups-to-token` rule [link](https://manage.auth0.com/#/rules)
+    
     ```sh
     function (user, context, callback) {
       const namespace = 'https://auth/';
@@ -32,11 +34,11 @@ Universal authentication & authorization platform for web, mobile, and legacy ap
     ```
 12. Get application Client ID, Client Secret, Domain (App Settings Tab)
 
-```sh
-Domain:        gdv.eu.auth0.com
-Client ID:     smcFVCQlqiSgyHpgP9WzcRJCsd3gNOYG
-Client Secret: xl7P4qhGNGU1xsfM47_DyVImXrj3a9_2dqvNgdadBlZfhaq0B8gBqiTAAMA68qiu
-```
+    ```sh
+    Domain:        gdv.eu.auth0.com
+    Client ID:     smcFVCQlqiSgyHpgP9WzcRJCsd3gNOYG
+    Client Secret: xl7P4qhGNGU1xsfM47_DyVImXrj3a9_2dqvNgdadBlZfhaq0B8gBqiTAAMA68qiu
+    ```
 
 ### 2. Dex [link](https://github.com/coreos/dex)
 `Dex` is an identity service that uses OpenID Connect to drive authentication for other apps.
@@ -90,7 +92,7 @@ kubectl apply -f src/oauth2-proxy/oauth2-certificate.yaml --namespace=$NAMESPACE
 check https://oauth2.example.com # replace example.com
 ```
 
-### 4. Add Auth0 user admin rights
+<!-- ### 4. Add Auth0 user admin rights
 ```sh
 {
 AUTH0_USER_USERNAME=dimag # auth0 created user at step 1.7 username
@@ -99,15 +101,15 @@ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/admin-user/clusterrolebinding.yaml
 sed -i -e "s@{{AUTH0_USER_USERNAME}}@${AUTH0_USER_USERNAME}@g" src/admin-user/clusterrolebinding.yaml
 kubectl apply -f src/admin-user/clusterrolebinding.yaml
 }
-```
+``` -->
 
-## Demo
+<!-- ## Demo
 
 <p align="center">
   <a target="_blank" href="https://asciinema.org/a/197034">
   <img src="https://asciinema.org/a/197034.png" width="885"></image>
   </a>
-</p>
+</p> -->
 
 # What's next?
 
