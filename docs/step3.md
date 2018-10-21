@@ -20,6 +20,7 @@ kubectl create -f src/psp
 
 ### 4. Create RBAC
 ```sh
+sed -i -e "s@{{NAMESPACE}}@${NAMESPACE}@g" src/rbac/developers.yaml
 kubectl create -f src/rbac
 ```
 
