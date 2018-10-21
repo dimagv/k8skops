@@ -18,9 +18,20 @@ http://127.0.0.1:5555/callback
     * `Disable Sign Ups` = True
 5. Enable DB connection (App Connections Tab: Database)
 6. Disable `google-oauth2` (App Connections Tab: Social)
-7. Create new user [link](https://manage.auth0.com/#/users)
-8. Verify user email. Auth2 will send a message to the created user's email
-9. Get application Client ID, Client Secret, Domain (App Settings Tab)
+7. Create new users [link](https://manage.auth0.com/#/users)
+8. Verify users emails. Auth0 will send a message to the created user's email
+9. Add `Auth0 Authorization` extension [link](https://manage.auth0.com/#/extensions)
+10. Create `admins` and `developers` groups and add users to them
+11. Create `add-groups-to-token` rule [link](https://manage.auth0.com/#/rules)
+```sh
+function (user, context, callback) {
+  const namespace = 'https://auth/';
+  context.idToken[namespace + 'groups'] = user.groups;
+  context.idToken.name = user.username;
+  callback(null, user, context);
+}
+```
+12. Get application Client ID, Client Secret, Domain (App Settings Tab)
 
 ```sh
 Domain:        gdv.eu.auth0.com
