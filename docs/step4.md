@@ -23,6 +23,7 @@ http://127.0.0.1:5555/callback
 9. Add `Auth0 Authorization` extension [link](https://manage.auth0.com/#/extensions)
 10. Create `admins` and `developers` groups and add users to them
 11. Create `add-groups-to-token` rule [link](https://manage.auth0.com/#/rules)
+
 ```sh
 function (user, context, callback) {
   const namespace = 'https://auth/';
