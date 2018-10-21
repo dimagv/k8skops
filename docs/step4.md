@@ -8,11 +8,10 @@ Universal authentication & authorization platform for web, mobile, and legacy ap
 1. Sign Up [link](https://auth0.com/signup?&signUpData=%7B%22category%22%3A%22button%22%7D)
 2. Create new application (`Regular Web Applications` Type) [link](https://manage.auth0.com/#/applications)
 3. Set `Allowed Callback URLs` (App Settings Tab)
-
-```sh
-https://dex.example.com/callback # replace example.com
-http://127.0.0.1:5555/callback
-```
+  ```sh
+  https://dex.example.com/callback # replace example.com
+  http://127.0.0.1:5555/callback
+  ```
 4. Create database connection [link](https://manage.auth0.com/#/connections/database)
     * `Requires Username` = True
     * `Disable Sign Ups` = True
@@ -23,15 +22,14 @@ http://127.0.0.1:5555/callback
 9. Add `Auth0 Authorization` extension [link](https://manage.auth0.com/#/extensions)
 10. Create `admins` and `developers` groups and add users to them
 11. Create `add-groups-to-token` rule [link](https://manage.auth0.com/#/rules)
-
-```sh
-function (user, context, callback) {
-  const namespace = 'https://auth/';
-  context.idToken[namespace + 'groups'] = user.groups;
-  context.idToken.name = user.username;
-  callback(null, user, context);
-}
-```
+  ```sh
+  function (user, context, callback) {
+    const namespace = 'https://auth/';
+    context.idToken[namespace + 'groups'] = user.groups;
+    context.idToken.name = user.username;
+    callback(null, user, context);
+  }
+  ```
 12. Get application Client ID, Client Secret, Domain (App Settings Tab)
 
 ```sh
