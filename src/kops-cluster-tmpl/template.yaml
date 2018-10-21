@@ -6,6 +6,7 @@ spec:
   kubelet:
     anonymousAuth: false
     authenticationTokenWebhook: true
+    authorizationMode: Webhook
   additionalPolicies:
     node: |
       [
@@ -40,12 +41,30 @@ spec:
     allowContainerRegistry: true
     legacy: false
   kubeAPIServer:
+    authorizationMode: Node,RBAC
+    enableAdmissionPlugins:
+    - DenyEscalatingExec
+    - PodSecurityPolicy
+    - Initializers
+    - NamespaceLifecycle
+    - LimitRanger
+    - ServiceAccount
+    - PersistentVolumeLabel
+    - DefaultStorageClass
+    - DefaultTolerationSeconds
+    - MutatingAdmissionWebhook
+    - ValidatingAdmissionWebhook
+    - NodeRestriction
+    - ResourceQuota
+    - PersistentVolumeClaimResize
+    - AlwaysPullImages
     anonymousAuth: false
     featureGates:
       ExpandPersistentVolumes: "true"
     oidcClientID: insurancetruck-app
     oidcIssuerURL: https://dex.{{.dnsZone}}
     oidcUsernameClaim: name
+    oidcGroupsClaim: groups
   kubeControllerManager:
     featureGates:
       ExpandPersistentVolumes: "true"

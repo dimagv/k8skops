@@ -1,3 +1,6 @@
+image: docker.io/dimag/dex
+imageTag: "groups"
+imagePullPolicy: "IfNotPresent"
 config:
   issuer: https://dex.{{DNS_ZONE}}
   storage:

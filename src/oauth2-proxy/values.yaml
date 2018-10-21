@@ -19,6 +19,7 @@ extraArgs:
   http-address: "0.0.0.0:4180"
   skip-provider-button: true
   set-authorization-header: true
+  scope: "openid profile email groups"
 ingress:
   enabled: true
   path: /

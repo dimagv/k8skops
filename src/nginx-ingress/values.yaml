@@ -1,0 +1,13 @@
+rbac:
+  create: true
+podSecurityPolicy:
+  enabled: true
+controller:
+  stats:
+    enabled: true
+  metrics:
+    enabled: true
+  publishService:
+    enabled: true
+  podAnnotations:
+    fluentbit.io/parser: nginx-ingress
