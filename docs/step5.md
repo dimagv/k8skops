@@ -1,4 +1,4 @@
-###### [Back](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step4.md)
+###### [back](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step4.md)
 
 # Step 5. Monitoring
 
@@ -30,17 +30,17 @@ kubectl create namespace monitoring
 helm repo add coreos https://s3-eu-west-1.amazonaws.com/coreos-charts/stable/
 ```
 
-#### 2.3. Create PodSecurityPolicy
+<!-- #### 2.3. Create PodSecurityPolicy
 ```sh
 kubectl apply -f src/kube-prometheus/psp.yaml
-```
+``` -->
 
-#### 2.4. Prometheus-operator
+#### 2.3. Prometheus-operator
 ```sh
 helm install --name prometheus-operator --namespace=monitoring coreos/prometheus-operator
 ```
 
-#### 2.5. Kube-prometheus
+#### 2.4. Kube-prometheus
 ```sh
 ALERTMANAGER_SLACK_API_URL=https://hooks.slack.com/services/... # https://api.slack.com/apps
 ALERTMANAGER_SLACK_CHANNEL=alertmanager
@@ -59,7 +59,7 @@ helm install --name kube-prometheus --namespace=monitoring -f src/kube-prometheu
 }
 ```
 
-#### 2.6. TLS Certs
+#### 2.5. TLS Certs
 ```sh
 {
 sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/kube-prometheus/certs/alertmanager-certificate.yaml
@@ -69,7 +69,7 @@ kubectl apply -f src/kube-prometheus/certs
 }
 ```
 
-#### 2.7. Service-monitors
+#### 2.6. Service-monitors
 ```sh
 kubectl apply -f src/kube-prometheus/service-monitors
 ```

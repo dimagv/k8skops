@@ -1,4 +1,4 @@
-###### [Back](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step1.md)
+###### [back](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step1.md)
 
 # Step 2. Create Kubernetes cluster
 

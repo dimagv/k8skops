@@ -1,4 +1,4 @@
-###### [Back](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step8.md)
+###### [back](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step8.md)
 
 # Step 9. Additionally
 
@@ -61,7 +61,7 @@ helm install --name kubewatch stable/kubewatch --values=src/kubewatch/values.yam
 ```
 
 
-### Audit [link](https://github.com/kubernetes/kops/blob/master/docs/cluster_spec.md#audit-logging)
+<!-- ### Audit [link](https://github.com/kubernetes/kops/blob/master/docs/cluster_spec.md#audit-logging)
 
 Kubernetes auditing provides a security-relevant chronological set of records documenting the sequence of activities that have affected system by individual users, administrators or other components of the system.
 
@@ -175,4 +175,4 @@ Kubernetes auditing provides a security-relevant chronological set of records do
     ```sh
     # ssh to master
     cat /var/log/kube-apiserver-audit.log
-    ```
+    ``` -->

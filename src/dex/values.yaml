@@ -8,7 +8,7 @@ config:
     config:
       inCluster: true
   logger:
-    level: debug
+    level: info
   web:
     http: 0.0.0.0:8080
   grpc:
