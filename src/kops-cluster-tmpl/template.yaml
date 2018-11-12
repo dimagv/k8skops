@@ -271,7 +271,7 @@ spec:
   subnets:
   - {{.awsRegion}}a
   cloudLabels:
-    k8s.io/cluster-autoscaler/enabled: 1
+    k8s.io/cluster-autoscaler/enabled: "true"
     kubernetes.io/cluster/{{.name}}.{{.dnsZone}}: ""
 
 ---
@@ -294,7 +294,7 @@ spec:
   subnets:
   - {{.awsRegion}}b
   cloudLabels:
-    k8s.io/cluster-autoscaler/enabled: 1
+    k8s.io/cluster-autoscaler/enabled: "true"
     kubernetes.io/cluster/{{.name}}.{{.dnsZone}}: ""
 
 ---
@@ -317,7 +317,7 @@ spec:
   subnets:
   - {{.awsRegion}}c
   cloudLabels:
-    k8s.io/cluster-autoscaler/enabled: 1
+    k8s.io/cluster-autoscaler/enabled: "true"
     kubernetes.io/cluster/{{.name}}.{{.dnsZone}}: ""
 
 ---
