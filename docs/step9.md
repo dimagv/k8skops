@@ -2,7 +2,7 @@
 
 # Step 9. Additionally
 
-### Autoscaler [link](https://github.com/kubernetes/kops/tree/master/addons/cluster-autoscaler)
+<!-- ### Autoscaler [link](https://github.com/kubernetes/kops/tree/master/addons/cluster-autoscaler)
 
 Cluster `Autoscaler` is a component that automatically adjusts the size of a Kubernetes Cluster so that all pods have a place to run and there are no unneeded nodes. 
 
@@ -13,7 +13,7 @@ vi src/autoscaler/cluster-autoscaler.sh
 ```sh
 # run `cluster-autoscaler.sh` script
 ./src/autoscaler/cluster-autoscaler.sh
-```
+``` -->
 
 ### Ark [link](https://github.com/heptio/ark)
 

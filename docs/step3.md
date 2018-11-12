@@ -2,10 +2,9 @@
 
 # Step 3. Configure cluster
 
-### 1. Set common environment variables
+### 1. Set environment variables
 ```sh
 export NAMESPACE=it-dev
-export DNS_ZONE=example.com
 ```
 
 ### 2. Create namespace
@@ -104,6 +103,15 @@ EMAIL="example\@email.com" # backslash required
 sed -i -e "s@{{EMAIL}}@${EMAIL}@g" src/cert-manager/issuer.yaml
 kubectl apply -f src/cert-manager/issuer.yaml
 }
+```
+
+### 11. Cluster Autoscaler [link](https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler)
+Cluster Autoscaler is a tool that automatically adjusts the size of the Kubernetes cluster when one of the following conditions is true:
+* there are pods that failed to run in the cluster due to insufficient resources,
+* there are nodes in the cluster that have been underutilized for an extended period of time and their pods can be placed on other existing nodes.
+
+```sh
+helm install stable/cluster-autoscaler --name cluster-autoscaler --set autoDiscovery.clusterName=$CLUSTER_NAME --namespace=kube-system
 ```
 
 <!-- ## Demo

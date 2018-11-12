@@ -18,6 +18,18 @@ spec:
           "Resource": [
             "arn:aws:iam::{{.awsAccountID}}:role/k8s-*"
           ]
+        },
+        {
+          "Effect": "Allow",
+          "Action": [
+            "autoscaling:DescribeAutoScalingGroups",
+            "autoscaling:DescribeAutoScalingInstances",
+            "autoscaling:DescribeLaunchConfigurations",
+            "autoscaling:DescribeTags",
+            "autoscaling:SetDesiredCapacity",
+            "autoscaling:TerminateInstanceInAutoScalingGroup"
+          ],
+          "Resource": "*"
         }
       ]
   api:
@@ -258,6 +270,9 @@ spec:
   rootVolumeSize: {{.nodeRootVolumeSize}}
   subnets:
   - {{.awsRegion}}a
+  cloudLabels:
+    k8s.io/cluster-autoscaler/enabled: 1
+    kubernetes.io/cluster/{{.name}}.{{.dnsZone}}: ""
 
 ---
 
@@ -278,6 +293,9 @@ spec:
   rootVolumeSize: {{.nodeRootVolumeSize}}
   subnets:
   - {{.awsRegion}}b
+  cloudLabels:
+    k8s.io/cluster-autoscaler/enabled: 1
+    kubernetes.io/cluster/{{.name}}.{{.dnsZone}}: ""
 
 ---
 
@@ -298,6 +316,9 @@ spec:
   rootVolumeSize: {{.nodeRootVolumeSize}}
   subnets:
   - {{.awsRegion}}c
+  cloudLabels:
+    k8s.io/cluster-autoscaler/enabled: 1
+    kubernetes.io/cluster/{{.name}}.{{.dnsZone}}: ""
 
 ---
 
