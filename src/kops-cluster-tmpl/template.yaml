@@ -18,18 +18,6 @@ spec:
           "Resource": [
             "arn:aws:iam::{{.awsAccountID}}:role/k8s-*"
           ]
-        },
-        {
-          "Effect": "Allow",
-          "Action": [
-            "autoscaling:DescribeAutoScalingGroups",
-            "autoscaling:DescribeAutoScalingInstances",
-            "autoscaling:DescribeLaunchConfigurations",
-            "autoscaling:DescribeTags",
-            "autoscaling:SetDesiredCapacity",
-            "autoscaling:TerminateInstanceInAutoScalingGroup"
-          ],
-          "Resource": "*"
         }
       ]
   api:

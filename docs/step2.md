@@ -14,6 +14,7 @@ kops toolbox template --values src/kops-cluster-tmpl/values.yaml --template src/
 ```sh
 export KOPS_STATE_STORE=s3://insurancetruck-k8s-ss
 export DNS_ZONE=example.com
+export REGION=eu-central-1
 export CLUSTER_NAME=insurancetruck.$DNS_ZONE
 ```
 

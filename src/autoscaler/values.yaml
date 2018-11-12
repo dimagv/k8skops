@@ -1,0 +1,26 @@
+image:
+  tag: v1.2.2
+autoDiscovery:
+  clusterName: {{CLUSTER_NAME}}
+cloudProvider: aws
+awsRegion: {{REGION}}
+rbac:
+  create: true
+replicaCount: 2
+affinity:
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+    - labelSelector:
+        matchExpressions:
+        - key: app
+          operator: In
+          values:
+          - aws-cluster-autoscaler
+      topologyKey: "kubernetes.io/hostname"
+podAnnotations:
+  iam.amazonaws.com/role: k8s-cluster-autoscaler
+# nodeSelector:
+#   kubernetes.io/role: master
+# tolerations:
+# - effect: NoSchedule
+#   key: node-role.kubernetes.io/master

@@ -81,7 +81,7 @@ Configure external DNS servers (AWS Route53, Google CloudDNS and others) for Kub
 `ExternalDNS` synchronizes exposed Kubernetes Services and Ingresses with DNS providers.
 
 ```sh
-# set vars
+# edit vars
 vi src/external-dns/external-dns.sh 
 ```
 ```sh
@@ -111,7 +111,16 @@ Cluster Autoscaler is a tool that automatically adjusts the size of the Kubernet
 * there are nodes in the cluster that have been underutilized for an extended period of time and their pods can be placed on other existing nodes.
 
 ```sh
-helm install stable/cluster-autoscaler --name cluster-autoscaler --set autoDiscovery.clusterName=$CLUSTER_NAME --namespace=kube-system
+# edit vars
+vi ./src/autoscaler/cluster-autoscaler-role.sh 
+# run script
+./src/autoscaler/cluster-autoscaler-role.sh
+
+{
+sed -i -e "s@{{CLUSTER_NAME}}@${CLUSTER_NAME}@g" src/autoscaler/values.yaml
+sed -i -e "s@{{REGION}}@${REGION}@g" src/autoscaler/values.yaml
+helm install stable/cluster-autoscaler --name cluster-autoscaler -f src/autoscaler/values.yaml --namespace=kube-system
+}
 ```
 
 <!-- ## Demo
