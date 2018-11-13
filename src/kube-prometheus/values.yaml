@@ -90,6 +90,16 @@ prometheus:
       action: replace
       target_label: kubernetes_pod_name
 grafana:
+  serverDashboardConfigmaps:
+    - advanced-data-exploration-dashboard
+    - elasticsearch-dashboard
+    - fluentbit-dashboard
+    - kubernetes-cluster-dashboard
+    - kubernetes-cluster-prometheus-dashboard
+    - mysql-innodb-metrics-dashboard
+    - mysql-overview-dashboard
+    - nginx-ingress-dashboard
+    - node-exporter-full-dashboard
   auth:
     anonymous:
       enabled: true

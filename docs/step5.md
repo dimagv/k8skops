@@ -11,7 +11,7 @@ sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/dashboard/values.yaml
 helm install --name kubernetes-dashboard src/dashboard/kubernetes-dashboard -f src/dashboard/values.yaml --namespace=kube-system
 
 sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/dashboard/kubernetes-dashboard-certificate.yaml
-kubectl apply -f src/dashboard/kubernetes-dashboard-certificate.yaml --namespace=kube-system
+kubectl create -f src/dashboard/kubernetes-dashboard-certificate.yaml --namespace=kube-system
 }
 
 check https://dashboard.example.com # replace example.com
@@ -49,6 +49,10 @@ GRAFANA_ADMIN_USER=admin # random string
 GRAFANA_ADMIN_PASSWORD=HeUGOIQI56Drbmm6GQ # random string
 
 {
+# add grafana dashboards via serverDashboardConfigmaps
+kubectl create -f src/kube-prometheus/dashboards-configmaps
+
+# install kube-prometheus
 sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/kube-prometheus/values.yaml
 sed -i -e "s@{{GRAFANA_ADMIN_USER}}@${GRAFANA_ADMIN_USER}@g" src/kube-prometheus/values.yaml
 sed -i -e "s@{{GRAFANA_ADMIN_PASSWORD}}@${GRAFANA_ADMIN_PASSWORD}@g" src/kube-prometheus/values.yaml
@@ -65,13 +69,13 @@ helm install --name kube-prometheus --namespace=monitoring -f src/kube-prometheu
 sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/kube-prometheus/certs/alertmanager-certificate.yaml
 sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/kube-prometheus/certs/grafana-certificate.yaml
 sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/kube-prometheus/certs/prometheus-certificate.yaml
-kubectl apply -f src/kube-prometheus/certs
+kubectl create -f src/kube-prometheus/certs
 }
 ```
 
 #### 2.6. Service-monitors
 ```sh
-kubectl apply -f src/kube-prometheus/service-monitors
+kubectl create -f src/kube-prometheus/service-monitors
 ```
 
 <!-- ## Demo

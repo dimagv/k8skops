@@ -1,5 +1,5 @@
 image:
-  tag: v1.2.2
+  tag: v1.12.0
 autoDiscovery:
   clusterName: {{CLUSTER_NAME}}
 cloudProvider: aws
