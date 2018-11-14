@@ -17,6 +17,7 @@ import (
 	k8s_client "k8s.io/client-go/tools/clientcmd"
 	k8s_api "k8s.io/client-go/tools/clientcmd/api"
 
+	"github.com/coreos/go-oidc"
 	"github.com/spf13/cobra"
 	"golang.org/x/oauth2"
 )
@@ -105,8 +106,8 @@ func cmd() *cobra.Command {
 	c.Flags().StringVar(&a.redirectURI, "redirect-uri", "http://127.0.0.1:5555/callback", "Callback URL for OAuth2 responses.")
 	c.Flags().StringVar(&issuerURL, "issuer", "https://dex.example.com", "URL of the OpenID Connect issuer.")
 	c.Flags().StringVar(&listen, "listen", "http://127.0.0.1:5555", "HTTP(S) address to listen at.")
-	c.Flags().StringVar(&a.kubeconfig, "kubeconfig", "config", "Kubeconfig file to configure")
-	c.Flags().StringVar(&a.kubecluster, "kubecluster", "https://api.insurancetruck.example.com", "K8s cluster URL")
+	c.Flags().StringVar(&a.kubeconfig, "kubeconfig", "", "Kubeconfig file to configure")
+	c.Flags().StringVar(&a.kubecluster, "kubecluster", "https://api.k8s.example.com", "K8s cluster URL")
 	return &c
 }
 

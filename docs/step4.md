@@ -92,6 +92,14 @@ kubectl apply -f src/oauth2-proxy/oauth2-certificate.yaml --namespace=$NAMESPACE
 check https://oauth2.example.com # replace example.com
 ```
 
+### 4. Auth-cli
+Connect to an OIDC provider and authenticate users before configuring their kubeconfig
+
+```sh
+./src/auth-cli/auth-cli --client-id=insurancetruck-app --client-secret=c2cHAtc2VjcmhhbXBsHAtc2VjcmV0ZXBsHAtZS1hhbXBsHAtc2cHAtc2VjcmV0 --issuer=https://dex.dimag.xyz --kubecluster=https://api.insurancetruck.dimag.xyz
+```
+> **or compile the application with your defaults**
+
 <!-- ### 4. Add Auth0 user admin rights
 ```sh
 {
