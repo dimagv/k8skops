@@ -32,10 +32,22 @@ spec:
   - etcdMembers:
     - instanceGroup: master-{{.awsRegion}}a
       name: a
+{{if .multiMaster}}
+    - instanceGroup: master-{{.awsRegion}}b
+      name: b
+    - instanceGroup: master-{{.awsRegion}}c
+      name: c
+{{end}}
     name: main
   - etcdMembers:
     - instanceGroup: master-{{.awsRegion}}a
       name: a
+{{if .multiMaster}}
+    - instanceGroup: master-{{.awsRegion}}b
+      name: b
+    - instanceGroup: master-{{.awsRegion}}c
+      name: c
+{{end}}
     name: events
   iam:
     allowContainerRegistry: true
