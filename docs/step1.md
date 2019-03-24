@@ -301,9 +301,9 @@ with the cluster's DNS.
 Kops s3 bucket
 ```sh
 # create s3 bucket
-$ aws s3api create-bucket --bucket insurancetruck-k8s-ss --region eu-central-1 --create-bucket-configuration LocationConstraint=eu-central-1
+$ aws s3api create-bucket --bucket ironjab-k8s-ss --region us-east-1
 # enable s3 bucket versioning
-$ aws s3api put-bucket-versioning --bucket insurancetruck-k8s-ss --versioning-configuration Status=Enabled
+$ aws s3api put-bucket-versioning --bucket ironjab-k8s-ss --versioning-configuration Status=Enabled
 ```
 
 # What's next?

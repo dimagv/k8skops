@@ -1,15 +1,17 @@
-name: insurancetruck
-dnsZone: example.com
-awsAccountID: "784590408214" # aws sts get-caller-identity --output text --query 'Account'
-awsRegion: eu-central-1
-s3bucket: insurancetruck-k8s-ss
-masterImage: ami-7c412f13
+name: cluster1
+dnsZone: k8s.ironjab.com
+awsAccountID: "532715861419" # aws sts get-caller-identity --output text --query 'Account'
+awsRegion: us-east-1
+s3bucket: ironjab-k8s-ss
+masterImage: ami-0a313d6098716f372
 masterMachineType: t2.medium
-multiMaster: false
+multiMaster: true
 masterMaxSize: 1
 masterMinSize: 1 # multiMaster = true => 1 * 3 subnets = 3 nodes; multiMaster = false => 1 * 1 subnet = 1 node
 masterRootVolumeSize: 50
-nodeImage: ami-7c412f13
+etcdVolumeSize: 10
+etcdEventsVolumeSize: 10
+nodeImage: ami-0a313d6098716f372
 nodeMachineType: t2.medium
 nodeMaxSize: 3
 nodeMixSize: 1 # 1 * 3 subnets = 3 nodes

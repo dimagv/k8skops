@@ -4,8 +4,9 @@
 
 ### 1. Set environment variables
 ```sh
-export NAMESPACE=it-dev
+export NAMESPACE=insurancetruck-dev
 ```
+> Note: If you want to change namespace name change also RBAC `src/rbac/insurancetruck-dev-admins.yaml`
 
 ### 2. Create namespace
 ```sh
@@ -19,7 +20,6 @@ kubectl create -f src/psp
 
 ### 3. Create RBAC
 ```sh
-sed -i -e "s@{{NAMESPACE}}@${NAMESPACE}@g" src/rbac/developers.yaml
 kubectl create -f src/rbac
 ```
 
@@ -42,7 +42,7 @@ Provide IAM credentials to containers running inside a kubernetes cluster based 
 ```sh
 {
 AWS_ACCOUNT_ID=$(aws sts get-caller-identity --output text --query 'Account')
-helm install stable/kube2iam --namespace kube-system --name kube2iam --set=extraArgs.base-role-arn=arn:aws:iam::${AWS_ACCOUNT_ID}:role/,host.iptables=true,host.interface=cali+,rbac.create=true,verbose=true
+helm install stable/kube2iam --namespace kube-system --name kube2iam --set=extraArgs.base-role-arn=arn:aws:iam::${AWS_ACCOUNT_ID}:role/,host.iptables=true,host.interface=cali+,rbac.create=true,verbose=false
 }
 ```
 
@@ -94,7 +94,14 @@ Automatically provision and manage TLS certificates in Kubernetes.
 
 ```sh
 # cert manager
-helm install --name cert-manager --namespace kube-system stable/cert-manager
+{
+kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.7/deploy/manifests/00-crds.yaml
+kubectl create namespace cert-manager
+kubectl label namespace cert-manager certmanager.k8s.io/disable-validation=true
+helm repo add jetstack https://charts.jetstack.io
+helm repo update
+helm install --name cert-manager --namespace cert-manager --version v0.7.0 jetstack/cert-manager
+}
 ```
 ```sh
 # issuer

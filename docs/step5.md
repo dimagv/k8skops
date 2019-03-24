@@ -2,80 +2,59 @@
 
 # Step 5. Monitoring
 
-### 1. Kubernetes Dashboard [link](https://github.com/kubernetes/dashboard)
+### 1. Kubernetes dashboard [link](https://github.com/kubernetes/dashboard)
 `Kubernetes Dashboard` is a general purpose, web-based UI for Kubernetes clusters. It allows users to manage applications running in the cluster and troubleshoot them, as well as manage the cluster itself.
 
 ```sh
 {
-sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/dashboard/values.yaml
-helm install --name kubernetes-dashboard src/dashboard/kubernetes-dashboard -f src/dashboard/values.yaml --namespace=kube-system
-
-sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/dashboard/kubernetes-dashboard-certificate.yaml
-kubectl create -f src/dashboard/kubernetes-dashboard-certificate.yaml --namespace=kube-system
+sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/kubernetes-dashboard/values.yaml
+helm install stable/kubernetes-dashboard --name kubernetes-dashboard -f src/kubernetes-dashboard/values.yaml --namespace kube-system
 }
 
-check https://dashboard.example.com # replace example.com
+check https://dashboard.k8s.ironjab.com
 ```
 
-### 2. [kube-prometheus](https://github.com/coreos/prometheus-operator/tree/master/contrib/kube-prometheus) ([Prometheus](https://prometheus.io/) & [Alertmanager](https://prometheus.io/docs/alerting/alertmanager/) & [Grafana](https://grafana.com/))
-`kube-prometheus` is a set of Kubernetes manifests, Grafana dashboards, and Prometheus rules combined with documentation and scripts to provide easy to operate end-to-end Kubernetes cluster monitoring with Prometheus using the Prometheus Operator.
+### 2. [Prometheus-operator](https://github.com/helm/charts/tree/master/stable/prometheus-operator) ([Prometheus](https://prometheus.io/) & [Alertmanager](https://prometheus.io/docs/alerting/alertmanager/) & [Grafana](https://grafana.com/))
+`prometheus-operator` is a set of Kubernetes manifests, Grafana dashboards, and Prometheus rules combined with documentation and scripts to provide easy to operate end-to-end Kubernetes cluster monitoring with Prometheus using the Prometheus Operator.
 
 #### 2.1. Create monitoring namespace
 ```sh
 kubectl create namespace monitoring
 ```
 
-#### 2.2. Add helm repos
-```sh
-helm repo add coreos https://s3-eu-west-1.amazonaws.com/coreos-charts/stable/
-```
-
 <!-- #### 2.3. Create PodSecurityPolicy
 ```sh
-kubectl apply -f src/kube-prometheus/psp.yaml
+kubectl apply -f src/prometheus-operator/prev/psp.yaml
 ``` -->
 
-#### 2.3. Prometheus-operator
-```sh
-helm install --name prometheus-operator --namespace=monitoring coreos/prometheus-operator
-```
-
-#### 2.4. Kube-prometheus
+#### 2.2. Prometheus-operator
 ```sh
 ALERTMANAGER_SLACK_API_URL=https://hooks.slack.com/services/... # https://api.slack.com/apps
 ALERTMANAGER_SLACK_CHANNEL=alertmanager
 ALERTMANAGER_SLACK_USERNAME=dimag
 GRAFANA_ADMIN_USER=admin # random string
-GRAFANA_ADMIN_PASSWORD=HeUGOIQI56Drbmm6GQ # random string
+GRAFANA_ADMIN_PASSWORD=HSA4AeUGOIQI56Drbmm6GQ # random string
 
 {
-# add grafana dashboards via serverDashboardConfigmaps
-kubectl create -f src/kube-prometheus/dashboards-configmaps
+# install prometheus-operator
+sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/prometheus-operator/values.yaml
+sed -i -e "s@{{GRAFANA_ADMIN_USER}}@${GRAFANA_ADMIN_USER}@g" src/prometheus-operator/values.yaml
+sed -i -e "s@{{GRAFANA_ADMIN_PASSWORD}}@${GRAFANA_ADMIN_PASSWORD}@g" src/prometheus-operator/values.yaml
+sed -i -e "s@{{ALERTMANAGER_SLACK_API_URL}}@${ALERTMANAGER_SLACK_API_URL}@g" src/prometheus-operator/values.yaml
+sed -i -e "s@{{ALERTMANAGER_SLACK_CHANNEL}}@${ALERTMANAGER_SLACK_CHANNEL}@g" src/prometheus-operator/values.yaml
+sed -i -e "s@{{ALERTMANAGER_SLACK_USERNAME}}@${ALERTMANAGER_SLACK_USERNAME}@g" src/prometheus-operator/values.yaml
 
-# install kube-prometheus
-sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/kube-prometheus/values.yaml
-sed -i -e "s@{{GRAFANA_ADMIN_USER}}@${GRAFANA_ADMIN_USER}@g" src/kube-prometheus/values.yaml
-sed -i -e "s@{{GRAFANA_ADMIN_PASSWORD}}@${GRAFANA_ADMIN_PASSWORD}@g" src/kube-prometheus/values.yaml
-sed -i -e "s@{{ALERTMANAGER_SLACK_API_URL}}@${ALERTMANAGER_SLACK_API_URL}@g" src/kube-prometheus/values.yaml
-sed -i -e "s@{{ALERTMANAGER_SLACK_CHANNEL}}@${ALERTMANAGER_SLACK_CHANNEL}@g" src/kube-prometheus/values.yaml
-sed -i -e "s@{{ALERTMANAGER_SLACK_USERNAME}}@${ALERTMANAGER_SLACK_USERNAME}@g" src/kube-prometheus/values.yaml
-helm install --name kube-prometheus --namespace=monitoring -f src/kube-prometheus/values.yaml coreos/kube-prometheus
+kubectl create -f src/prometheus-operator/dashboards # grafana dashboards
+kubectl create -f src/prometheus-operator/crd
+helm install --name prometheus-operator stable/prometheus-operator -f src/prometheus-operator/values.yaml --namespace monitoring
 }
 ```
 
-#### 2.5. TLS Certs
+#### 2.3. Create custom servicemonitors and rules
 ```sh
-{
-sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/kube-prometheus/certs/alertmanager-certificate.yaml
-sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/kube-prometheus/certs/grafana-certificate.yaml
-sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/kube-prometheus/certs/prometheus-certificate.yaml
-kubectl create -f src/kube-prometheus/certs
-}
-```
-
-#### 2.6. Service-monitors
-```sh
-kubectl create -f src/kube-prometheus/service-monitors
+kubectl create -f src/prometheus-operator/svc # services for servicemonitors
+kubectl create -f src/prometheus-operator/servicemonitors
+kubectl create -f src/prometheus-operator/rule
 ```
 
 <!-- ## Demo

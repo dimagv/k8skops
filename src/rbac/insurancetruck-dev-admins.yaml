@@ -1,8 +1,8 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: {{NAMESPACE}}-admin
-  namespace: {{NAMESPACE}}
+  name: insurancetruck-dev-admins
+  namespace: insurancetruck-dev
 rules:
 - apiGroups:
   - '*'
@@ -16,16 +16,16 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: RoleBinding
 metadata:
-  name: developers
-  namespace: {{NAMESPACE}}
+  name: insurancetruck-dev-admins
+  namespace: insurancetruck-dev
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: {{NAMESPACE}}-admin
+  name: insurancetruck-dev-admins
 subjects:
 - apiGroup: rbac.authorization.k8s.io
   kind: Group
-  name: developers
+  name: insurancetruck-dev-admins
 
 # ---
 

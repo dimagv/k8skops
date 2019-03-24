@@ -2,7 +2,7 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: external-dns
-  namespace: {{NAMESPACE}}
+  namespace: external-dns
 spec:
   strategy:
     type: Recreate
@@ -11,7 +11,7 @@ spec:
       labels:
         app: external-dns
       annotations:
-        iam.amazonaws.com/role: k8s-external-dns
+        iam.amazonaws.com/role: {{ROLE_NAME}}
     spec:
       serviceAccountName: external-dns
       containers:
@@ -25,4 +25,4 @@ spec:
         - --policy=upsert-only # would prevent ExternalDNS from deleting any records, omit to enable full synchronization
         - --aws-zone-type=public # only look at public hosted zones (valid values are public, private or no value for both)
         - --registry=txt
-        - --txt-owner-id=it-k8s
+        - --txt-owner-id=ironjab-k8s

@@ -3,7 +3,10 @@ kind: Cluster
 metadata:
   name: {{.name}}.{{.dnsZone}}
 spec:
+  kubeDNS:
+    provider: CoreDNS
   kubelet:
+    resolvConf: /run/systemd/resolve/resolv.conf
     anonymousAuth: false
     authenticationTokenWebhook: true
     authorizationMode: Webhook
@@ -32,11 +35,31 @@ spec:
   - etcdMembers:
     - instanceGroup: master-{{.awsRegion}}a
       name: a
+      volumeSize: {{.etcdVolumeSize}}
+{{if .multiMaster}}
+    - instanceGroup: master-{{.awsRegion}}b
+      name: b
+      volumeSize: {{.etcdVolumeSize}}
+    - instanceGroup: master-{{.awsRegion}}c
+      name: c
+      volumeSize: {{.etcdVolumeSize}}
+{{end}}
     name: main
+    version: 3.2.24
   - etcdMembers:
     - instanceGroup: master-{{.awsRegion}}a
       name: a
+      volumeSize: {{.etcdEventsVolumeSize}}
+{{if .multiMaster}}
+    - instanceGroup: master-{{.awsRegion}}b
+      name: b
+      volumeSize: {{.etcdEventsVolumeSize}}
+    - instanceGroup: master-{{.awsRegion}}c
+      name: c
+      volumeSize: {{.etcdEventsVolumeSize}}
+{{end}}
     name: events
+    version: 3.2.24
   iam:
     allowContainerRegistry: true
     legacy: false
@@ -64,11 +87,12 @@ spec:
     - ResourceQuota
     - PersistentVolumeClaimResize
     - AlwaysPullImages
+    - Priority
     anonymousAuth: false
     featureGates:
       ExpandPersistentVolumes: "true"
-    oidcClientID: insurancetruck-app
-    oidcIssuerURL: https://dex.{{.dnsZone}}
+    oidcClientID: kubernetes
+    oidcIssuerURL: https://keycloak.{{.dnsZone}}/auth/realms/{{.name}}
     oidcUsernameClaim: name
     oidcGroupsClaim: groups
   kubeControllerManager:
@@ -76,12 +100,13 @@ spec:
       ExpandPersistentVolumes: "true"
   kubernetesApiAccess:
   - 0.0.0.0/0
-  kubernetesVersion: 1.10.3
+  kubernetesVersion: 1.11.7
   masterInternalName: api.internal.{{.name}}.{{.dnsZone}}
   masterPublicName: api.{{.name}}.{{.dnsZone}}
   networkCIDR: 172.20.0.0/16
   networking:
-    calico: {}
+    calico:
+      majorVersion: v3
   nonMasqueradeCIDR: 100.64.0.0/10
   sshAccess:
   - 0.0.0.0/0
@@ -110,70 +135,47 @@ spec:
       content: |
         apiVersion: audit.k8s.io/v1beta1 # This is required.
         kind: Policy
-        # Don't generate audit events for all requests in RequestReceived stage.
         omitStages:
           - "RequestReceived"
         rules:
-          # Log pod changes at RequestResponse level
           - level: RequestResponse
             resources:
             - group: ""
-              # Resource "pods" doesn't match requests to any subresource of pods,
-              # which is consistent with the RBAC policy.
               resources: ["pods"]
-          # Log "pods/log", "pods/status" at Metadata level
           - level: Metadata
             resources:
             - group: ""
               resources: ["pods/log", "pods/status"]
-
-          # Don't log requests to a configmap called "controller-leader"
           - level: None
             resources:
             - group: ""
               resources: ["configmaps"]
               resourceNames: ["controller-leader"]
-
-          # Don't log watch requests by the "system:kube-proxy" on endpoints or services
           - level: None
             users: ["system:kube-proxy"]
             verbs: ["watch"]
             resources:
             - group: "" # core API group
               resources: ["endpoints", "services"]
-
-          # Don't log authenticated requests to certain non-resource URL paths.
           - level: None
             userGroups: ["system:authenticated"]
             nonResourceURLs:
             - "/api*" # Wildcard matching.
             - "/version"
-
-          # Log the request body of configmap changes in kube-system.
           - level: Request
             resources:
             - group: "" # core API group
               resources: ["configmaps"]
-            # This rule only applies to resources in the "kube-system" namespace.
-            # The empty string "" can be used to select non-namespaced resources.
             namespaces: ["kube-system"]
-
-          # Log configmap and secret changes in all other namespaces at the Metadata level.
           - level: Metadata
             resources:
             - group: "" # core API group
               resources: ["secrets", "configmaps"]
-
-          # Log all other resources in core and extensions at the Request level.
           - level: Request
             resources:
             - group: "" # core API group
             - group: "extensions" # Version of group should NOT be included.
-
-          # A catch-all rule to log all other requests at the Metadata level.
           - level: Metadata
-            # Long-running requests like watches that fall under this rule will not
-            # generate an audit event in RequestReceived.
             omitStages:
               - "RequestReceived"
 
