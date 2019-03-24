@@ -51,10 +51,14 @@ helm install --name prometheus-operator stable/prometheus-operator -f src/promet
 ```
 
 #### 2.3. Create custom servicemonitors and rules
+> For scraping `etcd` metrics open 4001/4002 ports in the aws masters sg!
+
 ```sh
+{
 kubectl create -f src/prometheus-operator/svc # services for servicemonitors
 kubectl create -f src/prometheus-operator/servicemonitors
 kubectl create -f src/prometheus-operator/rule
+}
 ```
 
 <!-- ## Demo

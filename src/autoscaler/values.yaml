@@ -18,7 +18,7 @@ affinity:
           - aws-cluster-autoscaler
       topologyKey: "kubernetes.io/hostname"
 podAnnotations:
-  iam.amazonaws.com/role: k8s-cluster-autoscaler
+  iam.amazonaws.com/role: {{ROLE_NAME}}
 # nodeSelector:
 #   kubernetes.io/role: master
 # tolerations:

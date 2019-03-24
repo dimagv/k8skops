@@ -4,10 +4,12 @@
 
 ### Set environment variables
 ```sh
+{
 export KOPS_STATE_STORE=s3://ironjab-k8s-ss
 export REGION=us-east-1
 export DNS_ZONE=k8s.ironjab.com
 export CLUSTER_NAME=cluster1.$DNS_ZONE
+}
 ```
 
 ### Generate cluster config

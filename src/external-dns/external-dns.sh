@@ -23,35 +23,8 @@ fi
 echo "7️⃣  Set up ExternalDNS"
 printf "\n"
 
-printf "   a) Creating IAM role with trust policy…\n"
-cat > trust-policy.json << EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Principal": {
-        "AWS": "arn:aws:iam::${AWS_ACCOUNT_ID}:role/nodes.${CLUSTER_NAME}.${DNS_ZONE}"
-      },
-      "Action": "sts:AssumeRole"
-    }
-  ]
-}
-EOF
 
-unset TESTOUTPUT
-TESTOUTPUT=$(aws iam list-roles | jq --arg role "$ROLE_NAME" -r '.Roles[] | select(.RoleName == $role) | .Arn')
-if [[ $? -eq 0 && -n "$TESTOUTPUT" ]]
-then
-  printf " ✅  Policy already exists\n"
-else
-  printf " ✅  Policy does not yet exist, creating now.\n"
-  ROLE=$(aws iam create-role --role-name $ROLE_NAME --assume-role-policy-document file://trust-policy.json)
-  printf " ✅ \n"
-fi
-
-
-printf "   b) Creating IAM policy to allow external-dns access to AWS resources…\n"
+printf "   a) Creating IAM policy…\n"
 cat > policy.json << EOF
 {
   "Version": "2012-10-17",
@@ -84,25 +57,59 @@ TESTOUTPUT=$(aws iam list-policies | jq --arg policy "$POLICY_NAME" -r '.Policie
 if [[ $? -eq 0 && -n "$TESTOUTPUT" ]]
 then
   printf " ✅  Policy already exists\n"
+  printf " ✅  Deleting existing policy\n"
   POLICY_ARN=$TESTOUTPUT
-else
-  printf " ✅  Policy does not yet exist, creating now.\n"
-  POLICY=$(aws iam create-policy --policy-name $POLICY_NAME --policy-document file://policy.json)
-  POLICY_ARN=$(echo $POLICY | jq -r '.Policy.Arn')
-  printf " ✅ \n"
+  aws iam detach-role-policy --role-name $ROLE_NAME --policy-arn $POLICY_ARN
+  aws iam delete-policy --policy-arn $POLICY_ARN
 fi
 
-printf "   c) Attaching policy to IAM Role…\n"
+printf " ✅  Policy does not exist, creating now\n"
+POLICY=$(aws iam create-policy --policy-name $POLICY_NAME --policy-document file://policy.json)
+POLICY_ARN=$(echo $POLICY | jq -r '.Policy.Arn')
+printf " ✅ \n"
+
+printf "   b) Creating IAM role…\n"
+cat > trust-policy.json << EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::${AWS_ACCOUNT_ID}:role/nodes.${CLUSTER_NAME}.${DNS_ZONE}"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+
+unset TESTOUTPUT
+TESTOUTPUT=$(aws iam list-roles | jq --arg role "$ROLE_NAME" -r '.Roles[] | select(.RoleName == $role) | .Arn')
+if [[ $? -eq 0 && -n "$TESTOUTPUT" ]]
+then
+  printf " ✅  Role already exists\n"
+  printf " ✅  Deleting existing role\n"
+  aws iam delete-role --role-name $ROLE_NAME
+fi
+
+printf " ✅  Role does not exist, creating now\n"
+ROLE=$(aws iam create-role --role-name $ROLE_NAME --assume-role-policy-document file://trust-policy.json)
+printf " ✅ \n"
+
+printf "   c) Attaching policy to role…\n"
 aws iam attach-role-policy --policy-arn $POLICY_ARN --role-name $ROLE_NAME
 printf " ✅ \n"
 
-printf "   d) Cleanup. Deleting policies…\n"
-rm trust-policy.json policy.json
-printf " ✅ \n"
-
+printf "   d) Deploying external-dns…\n"
 sed -i -e "s@{{ROLE_NAME}}@${ROLE_NAME}@g" src/external-dns/deployment.yaml
 sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/external-dns/deployment.yaml
 kubectl create ns external-dns
 kubectl apply -f src/external-dns
+printf " ✅ \n"
+
+printf "   e) Cleaning…\n"
+rm trust-policy.json policy.json
+printf " ✅ \n"
 
 printf "Done\n"

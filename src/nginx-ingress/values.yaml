@@ -278,10 +278,10 @@ controller:
       type: ClusterIP
 
     serviceMonitor:
-      enabled: true
+      enabled: false
       additionalLabels:
         release: prometheus-operator
-      namespace: "monitoring"
+      namespace: monitoring
 
   lifecycle: {}
 

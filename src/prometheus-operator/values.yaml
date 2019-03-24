@@ -317,11 +317,6 @@ alertmanager:
 grafana:
   enabled: true
 
-  dashboardsConfigMaps:
-    - prometheus-operator-etcd
-    - prometheus-operator-nginx-ingress
-    - prometheus-operator-node-exporter-full
-
   ## Deploy default dashboards.
   ##
   defaultDashboardsEnabled: true

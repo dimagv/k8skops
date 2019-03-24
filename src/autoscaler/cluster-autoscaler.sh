@@ -1,18 +1,12 @@
 #!/bin/bash
 
 #Set all the variables in this section
-CLUSTER_NAME="insurancetruck.example.com"
-CLOUD_PROVIDER=aws
-IMAGE=k8s.gcr.io/cluster-autoscaler:v1.1.0
-MIN_NODES=2
-MAX_NODES=3
-AWS_REGION=eu-central-1
-INSTANCE_GROUP_NAME="nodes"
-ASG_NAME="${INSTANCE_GROUP_NAME}.${CLUSTER_NAME}"   #ASG_NAME should be the name of ASG as seen on AWS console. 
-IAM_ROLE="masters.${CLUSTER_NAME}"                  #Where will the cluster-autoscaler process run? Currently on the master node. 
-SSL_CERT_PATH="/etc/ssl/certs/ca-certificates.crt"  #(/etc/ssl/certs for gce, /etc/ssl/certs/ca-bundle.crt for RHEL7.X)
-KOPS_STATE_STORE="s3://insurancetruck-k8s-ss"        #KOPS_STATE_STORE might already be set as an environment variable, in which case it doesn't have to be changed.
-
+CLUSTER_NAME="cluster1"
+DNS_ZONE="k8s.ironjab.com"
+REGION="us-east-1"
+AWS_ACCOUNT_ID=$(aws sts get-caller-identity --output text --query 'Account')
+ROLE_NAME="k8s-cluster-autoscaler-${CLUSTER_NAME}.${DNS_ZONE}"
+POLICY_NAME="k8s-cluster-autoscaler-${CLUSTER_NAME}.${DNS_ZONE}"
 
 #Best-effort install script prerequisites, otherwise they will need to be installed manually.
 if [[ -f /usr/bin/apt-get && ! -f /usr/bin/jq ]]
@@ -28,68 +22,88 @@ then
 fi
 
 
-echo "7️⃣  Set up Autoscaling"
-echo "   First, we need to update the minSize and maxSize attributes for the kops instancegroup."
-echo "   The next command will open the instancegroup config in your default editor, please save and exit the file once you're done…"
-sleep 1
-kops edit ig $INSTANCE_GROUP_NAME --state ${KOPS_STATE_STORE} --name ${CLUSTER_NAME}
-echo "   Running kops update cluster --yes"
-kops update cluster --yes --state ${KOPS_STATE_STORE} --name ${CLUSTER_NAME}
+echo "7️⃣  Set up Cluster Autoscaler"
 printf "\n"
 
-printf "   a) Creating IAM policy to allow aws-cluster-autoscaler access to AWS autoscaling groups…\n"
-cat > asg-policy.json << EOF
+printf "   a) Creating IAM policy…\n"
+cat > policy.json << EOF
 {
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Action": [
-                "autoscaling:DescribeAutoScalingGroups",
-                "autoscaling:DescribeAutoScalingInstances",
-                "autoscaling:DescribeTags",
-                "autoscaling:SetDesiredCapacity",
-                "autoscaling:TerminateInstanceInAutoScalingGroup"
-            ],
-            "Resource": "*"
-        }
-    ]
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "autoscaling:DescribeAutoScalingGroups",
+        "autoscaling:DescribeAutoScalingInstances",
+        "autoscaling:DescribeLaunchConfigurations",
+        "autoscaling:DescribeTags",
+        "autoscaling:SetDesiredCapacity",
+        "autoscaling:TerminateInstanceInAutoScalingGroup"
+      ],
+      "Resource": "*"
+    }
+  ]
 }
 EOF
 
-ASG_POLICY_NAME=aws-cluster-autoscaler
 unset TESTOUTPUT
-TESTOUTPUT=$(aws iam list-policies | jq -r '.Policies[] | select(.PolicyName == "aws-cluster-autoscaler") | .Arn')
+TESTOUTPUT=$(aws iam list-policies | jq --arg policy "$POLICY_NAME" -r '.Policies[] | select(.PolicyName == $policy) | .Arn')
 if [[ $? -eq 0 && -n "$TESTOUTPUT" ]]
 then
   printf " ✅  Policy already exists\n"
-  ASG_POLICY_ARN=$TESTOUTPUT
-else
-  printf " ✅  Policy does not yet exist, creating now.\n"
-  ASG_POLICY=$(aws iam create-policy --policy-name $ASG_POLICY_NAME --policy-document file://asg-policy.json)
-  ASG_POLICY_ARN=$(echo $ASG_POLICY | jq -r '.Policy.Arn')
-  printf " ✅ \n"
+  printf " ✅  Deleting existing policy\n"
+  POLICY_ARN=$TESTOUTPUT
+  aws iam detach-role-policy --role-name $ROLE_NAME --policy-arn $POLICY_ARN
+  aws iam delete-policy --policy-arn $POLICY_ARN
 fi
 
-printf "   b) Attaching policy to IAM Role…\n"
-aws iam attach-role-policy --policy-arn $ASG_POLICY_ARN --role-name $IAM_ROLE
+printf " ✅  Policy does not exist, creating now\n"
+POLICY=$(aws iam create-policy --policy-name $POLICY_NAME --policy-document file://policy.json)
+POLICY_ARN=$(echo $POLICY | jq -r '.Policy.Arn')
 printf " ✅ \n"
 
-printf "   c) Cleanup. Deleting policies…\n"
-rm asg-policy.json
+printf "   b) Creating IAM role…\n"
+cat > trust-policy.json << EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::${AWS_ACCOUNT_ID}:role/nodes.${CLUSTER_NAME}.${DNS_ZONE}"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+
+unset TESTOUTPUT
+TESTOUTPUT=$(aws iam list-roles | jq --arg role "$ROLE_NAME" -r '.Roles[] | select(.RoleName == $role) | .Arn')
+if [[ $? -eq 0 && -n "$TESTOUTPUT" ]]
+then
+  printf " ✅  Role already exists\n"
+  printf " ✅  Deleting existing role\n"
+  aws iam delete-role --role-name $ROLE_NAME
+fi
+
+printf " ✅  Role does not exist, creating now\n"
+ROLE=$(aws iam create-role --role-name $ROLE_NAME --assume-role-policy-document file://trust-policy.json)
 printf " ✅ \n"
 
-addon=cluster-autoscaler.yml
-wget -O ${addon} https://raw.githubusercontent.com/kubernetes/kops/master/addons/cluster-autoscaler/v1.8.0.yaml
+printf "   c) Attaching policy to role…\n"
+aws iam attach-role-policy --policy-arn $POLICY_ARN --role-name $ROLE_NAME
+printf " ✅ \n"
 
-sed -i -e "s@{{CLOUD_PROVIDER}}@${CLOUD_PROVIDER}@g" "${addon}"
-sed -i -e "s@{{IMAGE}}@${IMAGE}@g" "${addon}"
-sed -i -e "s@{{MIN_NODES}}@${MIN_NODES}@g" "${addon}"
-sed -i -e "s@{{MAX_NODES}}@${MAX_NODES}@g" "${addon}"
-sed -i -e "s@{{GROUP_NAME}}@${ASG_NAME}@g" "${addon}"
-sed -i -e "s@{{AWS_REGION}}@${AWS_REGION}@g" "${addon}"
-sed -i -e "s@{{SSL_CERT_PATH}}@${SSL_CERT_PATH}@g" "${addon}"
+printf "   d) Deploying cluster-autoscaler…\n"
+sed -i -e "s@{{CLUSTER_NAME}}@${CLUSTER_NAME}@g" src/autoscaler/values.yaml
+sed -i -e "s@{{REGION}}@${REGION}@g" src/autoscaler/values.yaml
+sed -i -e "s@{{ROLE_NAME}}@${ROLE_NAME}@g" src/autoscaler/values.yaml
+helm install stable/cluster-autoscaler --name cluster-autoscaler -f src/autoscaler/values.yaml --namespace=kube-system
+printf " ✅ \n"
 
-kubectl apply -f ${addon}
+printf "   e) Cleaning…\n"
+rm trust-policy.json policy.json
+printf " ✅ \n"
 
 printf "Done\n"

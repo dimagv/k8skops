@@ -51,7 +51,7 @@ Expanding in-use PVCs is an alpha feature. To use it, enable the ExpandInUsePers
 
 ```sh
 # create resizible storage class 
-kubectl apply -f src/storage-class/gp2-resize-storage-class.yaml --namespace $NAMESPACE
+kubectl apply -f src/storage-class/gp2-resize-storage-class.yaml
 ```
 > Note: Expanding EBS volumes is a time consuming operation. Also, there is a per-volume quota of one modification every 6 hours.
 
@@ -119,15 +119,11 @@ Cluster Autoscaler is a tool that automatically adjusts the size of the Kubernet
 
 ```sh
 # edit vars
-vi ./src/autoscaler/cluster-autoscaler-role.sh 
+vi ./src/autoscaler/cluster-autoscaler.sh
+```
+```sh
 # run script
-./src/autoscaler/cluster-autoscaler-role.sh
-
-{
-sed -i -e "s@{{CLUSTER_NAME}}@${CLUSTER_NAME}@g" src/autoscaler/values.yaml
-sed -i -e "s@{{REGION}}@${REGION}@g" src/autoscaler/values.yaml
-helm install stable/cluster-autoscaler --name cluster-autoscaler -f src/autoscaler/values.yaml --namespace=kube-system
-}
+./src/autoscaler/cluster-autoscaler.sh
 ```
 
 <!-- ## Demo
