@@ -70,6 +70,34 @@ helm install --name keycloak stable/keycloak -f src/keycloak/values.yaml --names
     ```sh
     4158b320-a82d-40e6-b239-01a83a2ae882
     ```
+8. Create groups [link](https://keycloak.k8s.ironjab.com/auth/admin/master/console/#/create/group/cluster1/parent/realm)
+
+    ```sh
+    Name: admins
+    ```
+
+    ```sh
+    Name: insurancetruck-dev-admins # {k8s-namespace}-admins
+    ```   
+9. Create users [link](https://keycloak.k8s.ironjab.com/auth/admin/master/console/#/create/user/cluster1)
+
+    ```sh
+    Username: admin
+    Email Verified: True
+    ```
+
+    ```sh
+    Username: dev
+    Email Verified: True
+    ```
+10. Set users passwords (Credentials tab)
+    * New Password: ***
+    * Password Confirmation: ***
+    * Temporary: `False`
+11. Add users to groups (Groups tab)
+    * admin  -> admins
+    * dev -> insurancetruck-dev-admins 
+
 
 ### 2. keycloak-gatekeeper [link](https://github.com/keycloak/keycloak-gatekeeper)
 A OpenID / Keycloak Proxy service
