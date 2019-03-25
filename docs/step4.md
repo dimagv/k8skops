@@ -30,7 +30,7 @@ helm install --name keycloak stable/keycloak -f src/keycloak/values.yaml --names
 4. Create kubernetes client [link](https://keycloak.k8s.ironjab.com/auth/admin/master/console/#/create/client/cluster1)
     * Client ID: `kubernetes`
     * Client Protocol: `openid-connect`
-5. Configure client (settings tab)
+5. Configure client (Settings tab)
     * Access Type: `confidential`
     * Direct Access Grants Enabled: `False`
     * Valid Redirect URIs: 
@@ -42,7 +42,7 @@ helm install --name keycloak stable/keycloak -f src/keycloak/values.yaml --names
         https://prometheus.k8s.ironjab.com/oauth/callback
         https://alertmanager.k8s.ironjab.com/oauth/callback
         ```
-6. Create client mappers:
+6. Create client mappers (Mappers tab):
 
     ```sh
     Name: name
@@ -65,7 +65,7 @@ helm install --name keycloak stable/keycloak -f src/keycloak/values.yaml --names
     Included Client Audience: kubernetes
     Add to ID token: True
     ```
-7. Get secret (credentials tab)
+7. Get secret (Credentials tab)
 
     ```sh
     4158b320-a82d-40e6-b239-01a83a2ae882

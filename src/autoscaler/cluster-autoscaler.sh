@@ -96,7 +96,7 @@ aws iam attach-role-policy --policy-arn $POLICY_ARN --role-name $ROLE_NAME
 printf " ✅ \n"
 
 printf "   d) Deploying cluster-autoscaler…\n"
-sed -i -e "s@{{CLUSTER_NAME}}@${CLUSTER_NAME}@g" src/autoscaler/values.yaml
+sed -i -e "s@{{CLUSTER_NAME}}@${CLUSTER_NAME}.${DNS_ZONE}@g" src/autoscaler/values.yaml
 sed -i -e "s@{{REGION}}@${REGION}@g" src/autoscaler/values.yaml
 sed -i -e "s@{{ROLE_NAME}}@${ROLE_NAME}@g" src/autoscaler/values.yaml
 helm install stable/cluster-autoscaler --name cluster-autoscaler -f src/autoscaler/values.yaml --namespace=kube-system
