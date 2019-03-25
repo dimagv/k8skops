@@ -34,6 +34,7 @@ helm install --name keycloak stable/keycloak -f src/keycloak/values.yaml --names
     * Access Type: `confidential`
     * Direct Access Grants Enabled: `False`
     * Valid Redirect URIs: 
+
         ```sh
         http://127.0.0.1:5555/callback # for auth-cli
         https://keycloak-gatekeeper.k8s.ironjab.com/oauth/callback # for gatekeeper
@@ -42,6 +43,7 @@ helm install --name keycloak stable/keycloak -f src/keycloak/values.yaml --names
         https://alertmanager.k8s.ironjab.com/oauth/callback
         ```
 6. Create client mappers:
+
     ```sh
     Name: name
     Mapper Type: User Property
@@ -49,12 +51,14 @@ helm install --name keycloak stable/keycloak -f src/keycloak/values.yaml --names
     Token Claim Name: name
     Claim JSON Type: String
     ```
+
     ```sh
     Name: groups
     Mapper Type: Group Membership
     Token Claim Name: groups
     Full group path: False
     ``` 
+
     ```sh
     Name: audience
     Mapper Type: Audience
@@ -62,6 +66,7 @@ helm install --name keycloak stable/keycloak -f src/keycloak/values.yaml --names
     Add to ID token: True
     ```
 7. Get secret (credentials tab)
+
     ```sh
     4158b320-a82d-40e6-b239-01a83a2ae882
     ```
