@@ -96,7 +96,7 @@ helm install --name keycloak stable/keycloak -f src/keycloak/values.yaml --names
     * Temporary: `False`
 11. Add users to groups (Groups tab)
     * admin  -> admins
-    * dev -> insurancetruck-dev-admins 
+    * dev    -> insurancetruck-dev-admins 
 
 
 ### 2. keycloak-gatekeeper [link](https://github.com/keycloak/keycloak-gatekeeper)
