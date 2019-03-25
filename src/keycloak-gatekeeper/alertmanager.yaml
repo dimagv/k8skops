@@ -1,0 +1,110 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: alertmanager-gatekeeper
+  namespace: keycloak-gatekeeper
+  labels:
+    role: keycloak-gatekeeper
+  annotations:
+    certmanager.k8s.io/cluster-issuer: letsencrypt-prod
+    certmanager.k8s.io/acme-http01-ingress-class: nginx
+spec:
+  rules:
+  - host: alertmanager.{{DNS_ZONE}}
+    http:
+      paths:
+      - backend:
+          serviceName: alertmanager-gatekeeper
+          servicePort: 3000
+        path: /
+  tls:
+  - hosts:
+    - alertmanager.{{DNS_ZONE}}
+    secretName: alertmanager-general-tls
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: alertmanager-gatekeeper
+  namespace: keycloak-gatekeeper
+  labels:
+    role: keycloak-gatekeeper
+spec:
+  ports:
+  - port: 3000
+    protocol: TCP
+  selector:
+    app: alertmanager-gatekeeper
+  type: ClusterIP
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alertmanager-gatekeeper
+  namespace: keycloak-gatekeeper
+  labels:
+    role: keycloak-gatekeeper
+data:
+  config.yaml: |
+    upstream-url: http://prometheus-operator-alertmanager.monitoring:9093
+    enable-authorization-header: false
+    redirection-url: https://alertmanager.{{DNS_ZONE}}
+    discovery-url: https://keycloak.{{DNS_ZONE}}/auth/realms/cluster1
+    client-id: kubernetes
+    client-secret: {{KEYCLOAK_SECRET}}
+    listen: 0.0.0.0:3000
+    encryption-key: vGcLt8ZUdPX5fShtLZaPzZkGWHZrT6T8
+    resources:
+    - uri: "/*"
+    enable-default-deny: true
+    enable-encrypted-token: true
+    enable-session-cookies: true
+    enable-metrics: true
+    enable-logging: true
+    enable-json-logging: true
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: alertmanager-gatekeeper
+  namespace: keycloak-gatekeeper
+  labels:
+    app: alertmanager-gatekeeper 
+    role: keycloak-gatekeeper
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: alertmanager-gatekeeper
+  template:
+    metadata:
+      labels:
+        app: alertmanager-gatekeeper
+    spec:
+      containers:
+      - name: keycloak-gatekeeper
+        image: keycloak/keycloak-gatekeeper:4.6.0.Final
+        imagePullPolicy: IfNotPresent
+        args:
+        - --config=/etc/config/config.yaml
+        volumeMounts:
+        - name: config
+          mountPath: /etc/config
+        ports:
+        - containerPort: 3000
+        livenessProbe:
+          httpGet:
+            path: /oauth/health
+            port: 3000
+          initialDelaySeconds: 3
+          timeoutSeconds: 2
+        readinessProbe:
+          httpGet:
+            path: /oauth/health
+            port: 3000
+          initialDelaySeconds: 3
+          timeoutSeconds: 2
+      volumes:
+      - name: config
+        configMap:
+          name: alertmanager-gatekeeper

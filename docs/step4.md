@@ -2,101 +2,108 @@
 
 # Step 4. AuthN and AuthZ
 
-### 1. Configure Auth0 [link](https://auth0.com)
-Universal authentication & authorization platform for web, mobile, and legacy applications.
+### 1. Keycloak [link](https://www.keycloak.org)
+Open Source Identity and Access Management For Modern Applications and Services
 
-1. Sign Up [link](https://auth0.com/signup?&signUpData=%7B%22category%22%3A%22button%22%7D)
-2. Create new application (`Regular Web Applications` Type) [link](https://manage.auth0.com/#/applications)
-3. Set `Allowed Callback URLs` (App Settings Tab)
-    
-    ```sh
-    https://dex.example.com/callback # replace example.com
-    http://127.0.0.1:5555/callback
-    ```
-4. Create database connection [link](https://manage.auth0.com/#/connections/database)
-    * `Requires Username` = True
-    * `Disable Sign Ups` = True
-5. Enable DB connection (App Connections Tab: Database)
-6. Disable `google-oauth2` (App Connections Tab: Social)
-7. Create new users [link](https://manage.auth0.com/#/users)
-8. Verify users emails. Auth0 will send a message to the created user's email
-9. Add `Auth0 Authorization` extension [link](https://manage.auth0.com/#/extensions)
-10. Create `admins` and `developers` groups and add users to them
-11. Create `add-groups-to-token` rule [link](https://manage.auth0.com/#/rules)
-    
-    ```sh
-    function (user, context, callback) {
-      const namespace = 'https://auth/';
-      context.idToken[namespace + 'groups'] = user.groups;
-      context.idToken.name = user.username;
-      callback(null, user, context);
-    }
-    ```
-12. Get application Client ID, Client Secret, Domain (App Settings Tab)
-
-    ```sh
-    Domain:        gdv.eu.auth0.com
-    Client ID:     smcFVCQlqiSgyHpgP9WzcRJCsd3gNOYG
-    Client Secret: xl7P4qhGNGU1xsfM47_DyVImXrj3a9_2dqvNgdadBlZfhaq0B8gBqiTAAMA68qiu
-    ```
-
-### 2. Dex [link](https://github.com/coreos/dex)
-`Dex` is an identity service that uses OpenID Connect to drive authentication for other apps.
-
-`Dex` acts as a portal to other identity providers through "connectors." This lets dex defer authentication to LDAP servers, SAML providers, or established identity providers like GitHub, Google, and Active Directory. Clients write their authentication logic once to talk to dex, then dex handles the protocols for a given backend.
-
+#### 1.1. Create namespace
 ```sh
-{
-DEX_ID=insurancetruck-app # random string
-DEX_SECRET=c2cHAtc2VjcmhhbXBsHAtc2VjcmV0ZXBsHAtZS1hhbXBsHAtc2cHAtc2VjcmV0 # random string
-AUTH0_DOMAIN=https://gdv.eu.auth0.com/ # slash at the end is REQUIRED
-AUTH0_CLIENT_ID=smcFVCQlqiSgyHpgP9WzcRJCsd3gNOYG # replace with yours
-AUTH0_CLIENT_SECRET=xl7P4qhGNGU1xsfM47_DyVImXrj3a9_2dqvNgdadBlZfhaq0B8gBqiTAAMA68qiu # replace with yours
-
-sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/dex/values.yaml
-sed -i -e "s@{{DEX_ID}}@${DEX_ID}@g" src/dex/values.yaml
-sed -i -e "s@{{DEX_SECRET}}@${DEX_SECRET}@g" src/dex/values.yaml
-sed -i -e "s@{{AUTH0_DOMAIN}}@${AUTH0_DOMAIN}@g" src/dex/values.yaml
-sed -i -e "s@{{AUTH0_CLIENT_ID}}@${AUTH0_CLIENT_ID}@g" src/dex/values.yaml
-sed -i -e "s@{{AUTH0_CLIENT_SECRET}}@${AUTH0_CLIENT_SECRET}@g" src/dex/values.yaml
-helm install --name dex src/dex/dex -f src/dex/values.yaml --namespace $NAMESPACE
-
-sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/dex/dex-certificate.yaml
-kubectl apply -f src/dex/dex-certificate.yaml --namespace=$NAMESPACE
-}
-
-check https://dex.example.com/.well-known/openid-configuration # replace example.com
+kubectl create namespace keycloak
 ```
 
-**Please DO NOT MOVE ON until you have deployed dex!**
-
-### 3. Oauth2_proxy [link](https://github.com/bitly/oauth2_proxy)
-A reverse proxy that provides authentication with Google, Github or other provider
-
+#### 1.2. Deploy keycloak
 ```sh
 {
-CLIENT_ID=insurancetruck-app # value from the DEX_ID (previous step)
-CLIENT_SECRET=c2cHAtc2VjcmhhbXBsHAtc2VjcmV0ZXBsHAtZS1hhbXBsHAtc2cHAtc2VjcmV0 # value from the DEX_SECRET (previous step)
-COOKIE_SECRET=d0R2lgvNVnOFWKxjulndOQ== # python -c 'import os,base64; print base64.b64encode(os.urandom(16))'
-
-sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/oauth2-proxy/values.yaml
-sed -i -e "s@{{CLIENT_ID}}@${CLIENT_ID}@g" src/oauth2-proxy/values.yaml
-sed -i -e "s@{{CLIENT_SECRET}}@${CLIENT_SECRET}@g" src/oauth2-proxy/values.yaml
-sed -i -e "s@{{COOKIE_SECRET}}@${COOKIE_SECRET}@g" src/oauth2-proxy/values.yaml
-helm install --name oauth2-proxy src/oauth2-proxy/oauth2-proxy -f src/oauth2-proxy/values.yaml --namespace $NAMESPACE
-
-sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/oauth2-proxy/oauth2-certificate.yaml
-kubectl apply -f src/oauth2-proxy/oauth2-certificate.yaml --namespace=$NAMESPACE
+sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/keycloak/values.yaml
+helm install --name keycloak stable/keycloak -f src/keycloak/values.yaml --namespace keycloak
 }
-
-check https://oauth2.example.com # replace example.com
 ```
 
-### 4. Auth-cli
+#### 1.2. Configure keycloak
+
+1. Sign In [link](https://keycloak.k8s.ironjab.com/auth)
+    * Username: `keycloak`
+    * Password: `kubectl -n keycloak get secret keycloak-http -o yaml | grep "password:" | awk '{print $2}' | base64 --decode`
+2. Create new realm for cluster [link](https://keycloak.k8s.ironjab.com/auth/admin/master/console/#/create/realm)
+    * Name: `cluster1`
+3. Increate token ttl to 30min [link](https://keycloak.k8s.ironjab.com/auth/admin/master/console/#/realms/cluster1/token-settings)
+    * Access Token Lifespan: `30`
+4. Create kubernetes client [link](https://keycloak.k8s.ironjab.com/auth/admin/master/console/#/create/client/cluster1)
+    * Client ID: `kubernetes`
+    * Client Protocol: `openid-connect`
+5. Configure client (settings tab)
+    * Access Type: `confidential`
+    * Direct Access Grants Enabled: `False`
+    * Valid Redirect URIs: 
+        ```sh
+        http://127.0.0.1:5555/callback # for auth-cli
+        https://keycloak-gatekeeper.k8s.ironjab.com/oauth/callback # for gatekeeper
+        https://dashboard.k8s.ironjab.com/oauth/callback
+        https://prometheus.k8s.ironjab.com/oauth/callback
+        https://alertmanager.k8s.ironjab.com/oauth/callback
+        ```
+6. Create client mappers:
+    ```sh
+    Name: name
+    Mapper Type: User Property
+    Property: username
+    Token Claim Name: name
+    Claim JSON Type: String
+    ```
+    ```sh
+    Name: groups
+    Mapper Type: Group Membership
+    Token Claim Name: groups
+    Full group path: False
+    ``` 
+    ```sh
+    Name: audience
+    Mapper Type: Audience
+    Included Client Audience: kubernetes
+    Add to ID token: True
+    ```
+7. Get secret (credentials tab)
+    ```sh
+    4158b320-a82d-40e6-b239-01a83a2ae882
+    ```
+
+### 2. keycloak-gatekeeper [link](https://github.com/keycloak/keycloak-gatekeeper)
+A OpenID / Keycloak Proxy service
+
+#### 2.1. Create namespace
+```sh
+kubectl create ns keycloak-gatekeeper
+```
+
+#### 2.2. Deploy keycloak-gatekeeper
+```sh
+KEYCLOAK_SECRET=4158b320-a82d-40e6-b239-01a83a2ae882
+
+{
+sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/keycloak-gatekeeper/alertmanager.yaml
+sed -i -e "s@{{KEYCLOAK_SECRET}}@${KEYCLOAK_SECRET}@g" src/keycloak-gatekeeper/alertmanager.yaml
+
+sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/keycloak-gatekeeper/prometheus.yaml
+sed -i -e "s@{{KEYCLOAK_SECRET}}@${KEYCLOAK_SECRET}@g" src/keycloak-gatekeeper/prometheus.yaml
+
+sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/keycloak-gatekeeper/kubernetes-dashboard.yaml
+sed -i -e "s@{{KEYCLOAK_SECRET}}@${KEYCLOAK_SECRET}@g" src/keycloak-gatekeeper/kubernetes-dashboard.yaml
+
+kubectl create -f src/keycloak-gatekeeper
+}
+```
+
+### 3. Auth-cli
 Connect to an OIDC provider and authenticate users before configuring their kubeconfig
 
 ```sh
-./src/auth-cli/auth-cli --client-id=insurancetruck-app --client-secret=c2cHAtc2VjcmhhbXBsHAtc2VjcmV0ZXBsHAtZS1hhbXBsHAtc2cHAtc2VjcmV0 --issuer=https://dex.dimag.xyz --kubecluster=https://api.insurancetruck.dimag.xyz
+{
+KEYCLOAK_CLIENT=kubernetes
+KEYCLOAK_SECRET=4158b320-a82d-40e6-b239-01a83a2ae882
+KEYCLOAK_REALM=https://keycloak.k8s.ironjab.com/auth/realms/cluster1
+KUBECLUSTER=https://api.cluster1.k8s.ironjab.com
+
+./src/auth-cli/auth-cli --client-id=$KEYCLOAK_CLIENT --client-secret=$KEYCLOAK_SECRET --issuer=$KEYCLOAK_REALM --kubecluster=$KUBECLUSTER
+}
 ```
 > **or compile the application with your defaults**
 

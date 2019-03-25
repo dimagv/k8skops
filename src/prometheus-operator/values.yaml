@@ -138,7 +138,7 @@ alertmanager:
   #           {{ end }}
 
   ingress:
-    enabled: true
+    enabled: false
 
     annotations:
       certmanager.k8s.io/cluster-issuer: letsencrypt-prod
@@ -872,7 +872,7 @@ prometheus:
     maxUnavailable: ""
 
   ingress:
-    enabled: true
+    enabled: false
 
     annotations:
       certmanager.k8s.io/cluster-issuer: letsencrypt-prod

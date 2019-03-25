@@ -1,0 +1,110 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: prometheus-gatekeeper
+  namespace: keycloak-gatekeeper
+  labels:
+    role: keycloak-gatekeeper
+  annotations:
+    certmanager.k8s.io/cluster-issuer: letsencrypt-prod
+    certmanager.k8s.io/acme-http01-ingress-class: nginx
+spec:
+  rules:
+  - host: prometheus.{{DNS_ZONE}}
+    http:
+      paths:
+      - backend:
+          serviceName: prometheus-gatekeeper
+          servicePort: 3000
+        path: /
+  tls:
+  - hosts:
+    - prometheus.{{DNS_ZONE}}
+    secretName: prometheus-general-tls
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-gatekeeper
+  namespace: keycloak-gatekeeper
+  labels:
+    role: keycloak-gatekeeper
+spec:
+  ports:
+  - port: 3000
+    protocol: TCP
+  selector:
+    app: prometheus-gatekeeper
+  type: ClusterIP
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-gatekeeper
+  namespace: keycloak-gatekeeper
+  labels:
+    role: keycloak-gatekeeper
+data:
+  config.yaml: |
+    upstream-url: http://prometheus-operator-prometheus.monitoring:9090
+    enable-authorization-header: false
+    redirection-url: https://prometheus.{{DNS_ZONE}}
+    discovery-url: https://keycloak.{{DNS_ZONE}}/auth/realms/cluster1
+    client-id: kubernetes
+    client-secret: {{KEYCLOAK_SECRET}}
+    listen: 0.0.0.0:3000
+    encryption-key: vGcLt8ZUdPX5fShtLZaPzZkGWHZrT6T8
+    resources:
+    - uri: "/*"
+    enable-default-deny: true
+    enable-encrypted-token: true
+    enable-session-cookies: true
+    enable-metrics: true
+    enable-logging: true
+    enable-json-logging: true
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: prometheus-gatekeeper
+  namespace: keycloak-gatekeeper
+  labels:
+    app: prometheus-gatekeeper 
+    role: keycloak-gatekeeper
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus-gatekeeper
+  template:
+    metadata:
+      labels:
+        app: prometheus-gatekeeper
+    spec:
+      containers:
+      - name: keycloak-gatekeeper
+        image: keycloak/keycloak-gatekeeper:4.6.0.Final
+        imagePullPolicy: IfNotPresent
+        args:
+        - --config=/etc/config/config.yaml
+        volumeMounts:
+        - name: config
+          mountPath: /etc/config
+        ports:
+        - containerPort: 3000
+        livenessProbe:
+          httpGet:
+            path: /oauth/health
+            port: 3000
+          initialDelaySeconds: 3
+          timeoutSeconds: 2
+        readinessProbe:
+          httpGet:
+            path: /oauth/health
+            port: 3000
+          initialDelaySeconds: 3
+          timeoutSeconds: 2
+      volumes:
+      - name: config
+        configMap:
+          name: prometheus-gatekeeper
