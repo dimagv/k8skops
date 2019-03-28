@@ -25,8 +25,9 @@ helm install --name keycloak stable/keycloak -f src/keycloak/values.yaml --names
     * Password: `kubectl -n keycloak get secret keycloak-http -o yaml | grep "password:" | awk '{print $2}' | base64 --decode`
 2. Create new realm for cluster [link](https://keycloak.k8s.ironjab.com/auth/admin/master/console/#/create/realm)
     * Name: `cluster1`
-3. Increate token ttl to 30min [link](https://keycloak.k8s.ironjab.com/auth/admin/master/console/#/realms/cluster1/token-settings)
+3. Increate token ttl [link](https://keycloak.k8s.ironjab.com/auth/admin/master/console/#/realms/cluster1/token-settings)
     * Access Token Lifespan: `30`
+    * SSO Session Idle: `60`
 4. Create kubernetes client [link](https://keycloak.k8s.ironjab.com/auth/admin/master/console/#/create/client/cluster1)
     * Client ID: `kubernetes`
     * Client Protocol: `openid-connect`
