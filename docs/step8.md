@@ -200,6 +200,7 @@ helm install --name jenkins stable/jenkins -f src/jenkins/values.yaml --namespac
 
 6. Configure jobs
     * Add branch source:
+    
         ```sh
         Type: Git
         Project Repository: http://54.152.51.78:10080/ironjab/it_2.71_backend
