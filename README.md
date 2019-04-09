@@ -6,5 +6,5 @@
 5. [Monitoring](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step5.md)
 6. [Logging](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step6.md)
 7. [Insurancetruck App](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step7.md)
-8. [Drone.io (CI/CD)](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step8.md)
+8. [Jenkins (CI/CD)](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step8.md)
 9. [Additionally](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step9.md)
