@@ -1,124 +1,86 @@
 ###### [back](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step7.md)
 
-# Step 8. Drone.io (CI/CD)
+# Step 8. Jenkins (CI/CD)
 
-### 1. Deploy drone
+### 1. Create namespace
+
+```sh
+kubectl create namespace jenkins
+```
+
+### 2. Setup jenkins backup
+
+* Create s3 bucket
+    ```sh
+    aws s3api create-bucket --bucket ironjab-k8s-jenkins --region us-east-1
+    ```
+* Create IAM role with s3 access policy 
+    ```sh
+    # run script
+    ./src/jenkins/jenkins-backup-role.sh # roleName: k8s-jenkins-backup-$CLUSTER_NAME
+    ```
+
+### 3. Deploy jenkins
 
 ```sh
 {
-GOGS_USER=gdv
+BACKUP_BUCKET=ironjab-k8s-jenkins
+BACKUP_ROLE=k8s-jenkins-backup-$CLUSTER_NAME
 
-sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/drone/values.yaml
-sed -i -e "s@{{GOGS_USER}}@${GOGS_USER}@g" src/drone/values.yaml
-helm install --name drone src/drone/drone -f src/drone/values.yaml --namespace $NAMESPACE
-
-sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/drone/drone-certificate.yaml
-kubectl apply -f src/drone/drone-certificate.yaml --namespace=$NAMESPACE
-}
-
-check https://drone.example.com   
-```
-
-### 2. Create test repos
-
-* Create 2 test repos in GOGS (`it-backend-test` and `it-frontend-test`)
-
-### 3. Configure drone
-
-1. Open https://drone.example.com
-2. Sign in as $GOGS_USER
-3. Activate **TEST** repos (`it-backend-test` and `it-frontend-test`). **DON'T ACTIVATE REAL REPOS**. It will replace existing webhook with drone's webhook
-4. Get drone api token https://drone.example.com/account/token
-
-### 4. Create drone service account
-
-```sh
-{
-kubectl create serviceaccount --namespace kube-system drone
-kubectl create clusterrolebinding drone-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:drone
+sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/jenkins/values.yaml
+sed -i -e "s@{{BACKUP_BUCKET}}@${BACKUP_BUCKET}@g" src/jenkins/values.yaml
+sed -i -e "s@{{BACKUP_ROLE}}@${BACKUP_ROLE}@g" src/jenkins/values.yaml
+helm install --name jenkins stable/jenkins -f src/jenkins/values.yaml --namespace jenkins
 }
 ```
 
-### 5. Set drone secrets
+### 4. Configure repos
 
-```sh
-DRONE_SERVER=https://drone.example.com
-DRONE_TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZXh0IjoiZ2R2IiwidHlwZSI6InVzZXIifQ.k0mJdool0CJhmM5MihuYWxx36AQmbMh_n_w2fbE7kpY
-AWS_ACCESS_KEY_ID=
-AWS_SECRET_ACCESS_KEY=
-DRONE_SA_TOKEN=$(kubectl -n kube-system get secret $(kubectl -n kube-system get secret | grep drone | awk '{print $1}') -o yaml | grep "token:" | awk '{print $2}' | base64 -d)
-K8S_API_SERVER=https://api.insurancetruck.example.com
+* Create GOGS webhooks
+    * it_2.71_backend:
 
-{
-# it-backend-test
-BACKEND_REPO=ironjab/it-backend-test
+        ```sh
+        # job={{jenkins_job_name}}
+        Payload URL: https://jenkins.k8s.ironjab.com/gogs-webhook/?job=it_2.71_backend
+        ```
+    * it_2.71_frontend:
+    
+        ```sh
+        # job={{jenkins_job_name}}
+        Payload URL: https://jenkins.k8s.ironjab.com/gogs-webhook/?job=it_2.71_frontend
+        ```
 
-docker run --env="DRONE_SERVER=$DRONE_SERVER" --env="DRONE_TOKEN=$DRONE_TOKEN" drone/cli secret add -repository $BACKEND_REPO -image quay.io/ipedrazas/drone-helm -name dev_api_server -value $K8S_API_SERVER
-docker run --env="DRONE_SERVER=$DRONE_SERVER" --env="DRONE_TOKEN=$DRONE_TOKEN" drone/cli secret add -repository $BACKEND_REPO -image quay.io/ipedrazas/drone-helm -name dev_kubernetes_token -value $DRONE_SA_TOKEN
-docker run --env="DRONE_SERVER=$DRONE_SERVER" --env="DRONE_TOKEN=$DRONE_TOKEN" drone/cli secret add -repository $BACKEND_REPO -image plugins/ecr -name ecr_access_key -value $AWS_ACCESS_KEY_ID
-docker run --env="DRONE_SERVER=$DRONE_SERVER" --env="DRONE_TOKEN=$DRONE_TOKEN" drone/cli secret add -repository $BACKEND_REPO -image plugins/ecr -name ecr_secret_key -value $AWS_SECRET_ACCESS_KEY
-docker run --env="DRONE_SERVER=$DRONE_SERVER" --env="DRONE_TOKEN=$DRONE_TOKEN" drone/cli secret add -repository $BACKEND_REPO -image plugins/ecr -name ecr_region -value eu-central-1
-}
-
-{
-# it-frontend-test
-FRONTEND_REPO=ironjab/it-frontend-test
-
-docker run --env="DRONE_SERVER=$DRONE_SERVER" --env="DRONE_TOKEN=$DRONE_TOKEN" drone/cli secret add -repository $FRONTEND_REPO -image quay.io/ipedrazas/drone-helm -name dev_api_server -value $K8S_API_SERVER
-docker run --env="DRONE_SERVER=$DRONE_SERVER" --env="DRONE_TOKEN=$DRONE_TOKEN" drone/cli secret add -repository $FRONTEND_REPO -image quay.io/ipedrazas/drone-helm -name dev_kubernetes_token -value $DRONE_SA_TOKEN
-docker run --env="DRONE_SERVER=$DRONE_SERVER" --env="DRONE_TOKEN=$DRONE_TOKEN" drone/cli secret add -repository $FRONTEND_REPO -image plugins/ecr -name ecr_access_key -value $AWS_ACCESS_KEY_ID
-docker run --env="DRONE_SERVER=$DRONE_SERVER" --env="DRONE_TOKEN=$DRONE_TOKEN" drone/cli secret add -repository $FRONTEND_REPO -image plugins/ecr -name ecr_secret_key -value $AWS_SECRET_ACCESS_KEY
-docker run --env="DRONE_SERVER=$DRONE_SERVER" --env="DRONE_TOKEN=$DRONE_TOKEN" drone/cli secret add -repository $FRONTEND_REPO -image plugins/ecr -name ecr_region -value eu-central-1
-}
-```
-
-### 6. Configure test repos
-
-* Clone `it_2.71_backend` and `it_2.71_frontend`
+* Clone repos
 
     ```sh
     {
-    # it-backend
-    git clone ssh://git@54.152.51.78:10022/ironjab/it_2.71_backend.git
+    git clone http://54.152.51.78:10080/ironjab/it_2.71_backend.git
 
-    # it-frontend
-    git clone ssh://git@54.152.51.78:10022/ironjab/it_2.71_frontend.git
+    git clone http://54.152.51.78:10080/ironjab/it_2.71_frontend.git
     }
     ```
 
-* Change remote repository URL to break nothing in the working app
+* Add Jenkinsfile
 
     ```sh
-    {
-    # it-backend
-    cd it_2.71_backend && git remote set-url origin http://54.152.51.78:10080/ironjab/it-backend-test.git && cd ..
-
-    # it-frontend
-    cd it_2.71_frontend && git remote set-url origin http://54.152.51.78:10080/ironjab/it-frontend-test.git && cd ..
-    }
-    ```
-
-* Configure .drone.yaml
-
-    ```sh
-    REGISTRY=784590408214.dkr.ecr.eu-central-1.amazonaws.com
+    REGISTRY=532715861419.dkr.ecr.us-east-1.amazonaws.com
 
     {
     # it-backend
-    REPO=784590408214.dkr.ecr.eu-central-1.amazonaws.com/insurancetruck/backend
-    sed -i -e "s@{{REPO}}@${REPO}@g" src/drone/.drone.backend.yml
-    sed -i -e "s@{{REGISTRY}}@${REGISTRY}@g" src/drone/.drone.backend.yml
-    sed -i -e "s@{{NAMESPACE}}@${NAMESPACE}@g" src/drone/.drone.backend.yml
-    mv src/drone/.drone.backend.yml it_2.71_backend/.drone.yml
+    REPO=ironjab/it_2.71_backend
+    sed -i -e "s@{{REPO}}@${REPO}@g" src/jenkins/Jenkinsfile-backend
+    sed -i -e "s@{{REGISTRY}}@${REGISTRY}@g" src/jenkins/Jenkinsfile-backend
+    sed -i -e "s@{{NAMESPACE}}@${NAMESPACE}@g" src/jenkins/Jenkinsfile-backend
+    cp src/jenkins/Jenkinsfile-backend it_2.71_backend/Jenkinsfile
     }
 
     {
     # it-frontend
-    REPO=784590408214.dkr.ecr.eu-central-1.amazonaws.com/insurancetruck/frontend
-    sed -i -e "s@{{REPO}}@${REPO}@g" src/drone/.drone.frontend.yml
-    sed -i -e "s@{{REGISTRY}}@${REGISTRY}@g" src/drone/.drone.frontend.yml
-    sed -i -e "s@{{NAMESPACE}}@${NAMESPACE}@g" src/drone/.drone.frontend.yml
-    mv src/drone/.drone.frontend.yml it_2.71_frontend/.drone.yml
+    REPO=ironjab/it_2.71_frontend
+    sed -i -e "s@{{REPO}}@${REPO}@g" src/jenkins/Jenkinsfile-frontend
+    sed -i -e "s@{{REGISTRY}}@${REGISTRY}@g" src/jenkins/Jenkinsfile-frontend
+    sed -i -e "s@{{NAMESPACE}}@${NAMESPACE}@g" src/jenkins/Jenkinsfile-frontend
+    cp src/jenkins/Jenkinsfile-frontend it_2.71_frontend/Jenkinsfile
     }
     ```
 
@@ -127,8 +89,8 @@ docker run --env="DRONE_SERVER=$DRONE_SERVER" --env="DRONE_TOKEN=$DRONE_TOKEN" d
     ```sh
     {
     # it-backend
-    cp -r src/it-backend/it-backend it_2.71_backend/helm
-    cp src/it-backend/values.yaml it_2.71_backend/helm # values.yaml should be configured from the previous step7
+    cp -r src/insurancetruck/backend/chart it_2.71_backend/helm
+    cp src/insurancetruck/backend/values.yaml it_2.71_backend/helm # values.yaml should be configured from the previous step7
     cd it_2.71_backend 
     git add . && git commit -m "add ci/cd" && git push origin master
     cd ..
@@ -136,30 +98,115 @@ docker run --env="DRONE_SERVER=$DRONE_SERVER" --env="DRONE_TOKEN=$DRONE_TOKEN" d
 
     {
     # it-frontend
-    vi it_2.71_frontend/webpack.prod.config.js # change `process.env.API_URL` => https://it-backend.example.com
-    cp -r src/it-frontend/it-frontend it_2.71_frontend/helm
-    cp src/it-frontend/values.yaml it_2.71_frontend/helm # values.yaml should be configured from the previous step7
+    sed -i -e "s@'process.env.API_URL'.*@'process.env.API_URL': JSON.stringify('https://backend.${NAMESPACE}.${DNS_ZONE}'),@g" it_2.71_frontend/webpack.dev.config.js
+
+    cp -r src/insurancetruck/frontend/chart it_2.71_frontend/helm
+    cp src/insurancetruck/frontend/values.yaml it_2.71_frontend/helm # values.yaml should be configured from the previous step7
     cd it_2.71_frontend
     git add . && git commit -m "add ci/cd" && git push origin master
     cd ..
     }
     ```
 
-* Check
+### 5. Configure jenkins
+
+1. Sign In [link](https://jenkins.k8s.ironjab.com/login)
+    * Username: `admin`
+    * Password: `kubectl get secret --namespace jenkins jenkins -o jsonpath="{.data.jenkins-admin-password}" | base64 --decode`
+2. Create credentials [link](https://jenkins.k8s.ironjab.com/credentials/store/system/domain/_/newCredentials)
 
     ```sh
-    # should see running builds
-    open https://drone.example.com/ironjab/ 
-    
-    helm ls
+    Kind: SSH Username with private key
+    Username: gogs
+    Private Key: paste gogs private key directly
     ```
 
-## Demo
+    ```sh
+    Kind: AWS Credentials
+    ID: ecr-registry
+    # create IAM user for jenkins only with ECR access for security purpose
+    Access Key ID: ***
+    Secret Access Key: ***
+    ```
+3. Configure kubernetes plugin  [link](https://jenkins.k8s.ironjab.com/configure)
+    * Create `Kubernetes Pod Template` by hand:
 
-<p align="center">
-  <a target="_blank" href="https://asciinema.org/a/197077">
-  <img src="https://asciinema.org/a/197077.png" width="885"></image>
-  </a>
-</p>
+        ```sh
+        podTemplate(
+            label: 'insurancetruck', 
+            inheritFrom: 'default',
+            serviceAccount: 'jenkins',
+            containers: [
+                containerTemplate(
+                    name: 'docker', 
+                    image: 'docker:18.06.3',
+                    ttyEnabled: true,
+                    command: 'cat',
+                    resourceRequestCpu: '250m',
+                    resourceLimitCpu: '250m',
+                    resourceRequestMemory: '256Mi',
+                    resourceLimitMemory: '512Mi'
+                ),
+                containerTemplate(
+                    name: 'helm', 
+                    image: 'lachlanevenson/k8s-helm:v2.13.1',
+                    ttyEnabled: true,
+                    command: 'cat',
+                    resourceRequestCpu: '250m',
+                    resourceLimitCpu: '250m',
+                    resourceRequestMemory: '256Mi',
+                    resourceLimitMemory: '512Mi'
+                )
+            ],
+            volumes: [
+                hostPathVolume(
+                    hostPath: '/var/run/docker.sock',
+                    mountPath: '/var/run/docker.sock'
+                )
+            ]
+        )
+        ```
+
+4. Configure slack plugin
+    * Create incoming webhook [link](https://api.slack.com/incoming-webhooks)
+
+        ```sh
+        # Webhook URL
+        https://hooks.slack.com/services/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
+        ```
+
+    * Global Slack Notifier Settings:
+
+        ```sh
+        Slack compatible app URL: https://hooks.slack.com/services/
+        Integration Token Credential ID:
+            Kind: Secret text
+            ID: slack
+            Secret: T0MRN6VZL/BHQT9AHNG/qsr6rpEm8SNm8tl6KG7rjfn9
+        Channel or Slack ID: "#ironjab-jenkins"
+        ```
+
+5. Create jobs [link](https://jenkins.k8s.ironjab.com/view/all/newJob)
+
+    ```sh
+    Name: it_2.71_backend
+    Type: Multibranch Pipeline
+    ```
+
+    ```sh
+    Name: it_2.71_frontend
+    Type: Multibranch Pipeline
+    ```
+
+6. Configure jobs
+    * Add branch source:
+        ```sh
+        Type: Git
+        Project Repository: http://54.152.51.78:10080/ironjab/it_2.71_backend
+                            http://54.152.51.78:10080/ironjab/it_2.71_frontend
+        Credentials: gogs
+        ```
+
+# What's next?
 
 ### Step 9. [Additionally](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step9.md)

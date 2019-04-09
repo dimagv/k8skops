@@ -1,0 +1,19 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    app: prometheus-operator-cluster-autoscaler
+    release: prometheus-operator
+  name: prometheus-operator-cluster-autoscaler
+  namespace: monitoring
+spec:
+  jobLabel: app
+  endpoints:
+  - interval: 30s
+    port: http
+  namespaceSelector:
+    matchNames:
+    - kube-system
+  selector:
+    matchLabels:
+      app: aws-cluster-autoscaler

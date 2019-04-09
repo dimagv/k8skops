@@ -3,6 +3,8 @@ kind: Cluster
 metadata:
   name: {{.name}}.{{.dnsZone}}
 spec:
+  docker:
+    version: 18.06.3
   kubeDNS:
     provider: CoreDNS
   kubelet:

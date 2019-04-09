@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: insurancetruck-dev
+  namespace: insurancetruck-dev
+spec:
+  limits:
+  - default:
+      memory: 512Mi
+      cpu: 500m
+    defaultRequest:
+      memory: 128Mi
+      cpu: 100m
+    max:
+      memory: 512Mi
+      cpu: 500m
+    min:
+      memory: 32Mi
+      cpu: 100m
+    type: Container

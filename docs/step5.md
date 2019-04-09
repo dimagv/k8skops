@@ -10,8 +10,6 @@
 sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/kubernetes-dashboard/values.yaml
 helm install stable/kubernetes-dashboard --name kubernetes-dashboard -f src/kubernetes-dashboard/values.yaml --namespace kube-system
 }
-
-check https://dashboard.k8s.ironjab.com
 ```
 
 ### 2. [Prometheus-operator](https://github.com/helm/charts/tree/master/stable/prometheus-operator) ([Prometheus](https://prometheus.io/) & [Alertmanager](https://prometheus.io/docs/alerting/alertmanager/) & [Grafana](https://grafana.com/))
@@ -30,7 +28,7 @@ kubectl apply -f src/prometheus-operator/prev/psp.yaml
 #### 2.2. Prometheus-operator
 ```sh
 ALERTMANAGER_SLACK_API_URL=https://hooks.slack.com/services/... # https://api.slack.com/apps
-ALERTMANAGER_SLACK_CHANNEL=alertmanager
+ALERTMANAGER_SLACK_CHANNEL=ironjab-alertmanager
 ALERTMANAGER_SLACK_USERNAME=dimag
 GRAFANA_ADMIN_USER=admin # random string
 GRAFANA_ADMIN_PASSWORD=HSA4AeUGOIQI56Drbmm6GQ # random string
@@ -60,14 +58,6 @@ kubectl create -f src/prometheus-operator/servicemonitors
 kubectl create -f src/prometheus-operator/rule
 }
 ```
-
-<!-- ## Demo
-
-<p align="center">
-  <a target="_blank" href="https://asciinema.org/a/197035">
-  <img src="https://asciinema.org/a/197035.png" width="885"></image>
-  </a>
-</p> -->
 
 # What's next?
 

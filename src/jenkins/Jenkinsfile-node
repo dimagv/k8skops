@@ -1,0 +1,47 @@
+node("insurancetruck") {
+    try {
+        def registry = "{{REGISTRY}}"
+        def repository = "${registry}/{{REPO}}"
+        def commitId
+
+        stage ('Prepare') {
+            checkout scm
+
+            commitId = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+        }
+
+        stage ('Build') {
+            container ('docker') {
+                def imageDev = docker.build("${repository}")
+
+                docker.withRegistry("https://${registry}", "ecr:us-east-1:ecr-registry") {
+                    imageDev.push("${commitId}")
+                    imageDev.push("latest")
+                }
+
+                sh "docker rmi -f ${repository}:${commitId}"
+                sh "docker rmi -f ${repository}:latest"
+            }
+        }
+
+        stage ('Deploy') {
+            container ('helm') {
+                sh "helm upgrade backend-insurancetruck-dev --install --wait --set image.repository=${repository},image.tag=${commitId} --namespace=insurancetruck-dev"
+            }
+        }
+
+    } catch (Exception e) {
+        currentBuild.result = "FAILED"
+        throw e
+    } finally {
+        stage ('Notify') {
+            def COLOR_MAP = ['SUCCESS': 'good', 'FAILURE': 'danger', 'UNSTABLE': 'danger', 'ABORTED': 'danger']
+            def buildUser = currentBuild.rawBuild.getCause(Cause.UserIdCause).getUserId()
+
+            slackSend (
+                color: COLOR_MAP[currentBuild.currentResult], 
+                message: "*${currentBuild.currentResult}:* Job ${env.JOB_NAME} build ${env.BUILD_NUMBER} by ${buildUser}\n More info at: ${env.BUILD_URL}"
+                )
+        }
+    }
+}

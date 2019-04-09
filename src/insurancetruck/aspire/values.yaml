@@ -1,0 +1,37 @@
+# Default values for aspire.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: {{REPO}}
+  tag: latest
+  pullPolicy: Always
+
+service:
+  type: ClusterIP
+  port: 80
+
+mysqlHost: {{MYSQL_HOST}}
+mysqlRootPassword: {{MYSQL_ROOT_PASS}}
+mysqlUser: {{MYSQL_USER}}
+mysqlPassword: {{MYSQL_PASS}}
+mysqlDatabase: {{MYSQL_DB}}
+
+mainSite: {{MAIN_SITE}}
+mainPort: 80
+
+smtpHost: email-smtp.us-east-1.amazonaws.com
+smtpPort: 587
+smtpFrom: vin_service@insurancetruck.com
+smtpTo1: artem.z1@ironjab.com
+smtpTo2: artem.z1@ironjab.com
+smtpName: {{SMTP_NAME}}
+smtpPassword: {{SMTP_PASS}}
+
+pushKey: {{PUSH_KEY}}
+pushLink: https://www.maple-tech.com/ctcstaging/services/createApp                            
+pushStatusLink: https://www.maple-tech.com/ctcstaging/services/quoteStatusQuery              
+pushMvrLink: https://www.maple-tech.com/ctcstaging/services/getMVR                           
+push: enabled 

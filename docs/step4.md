@@ -14,6 +14,7 @@ kubectl create namespace keycloak
 ```sh
 {
 sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/keycloak/values.yaml
+
 helm install --name keycloak stable/keycloak -f src/keycloak/values.yaml --namespace keycloak
 }
 ```
@@ -130,9 +131,10 @@ kubectl create -f src/keycloak-gatekeeper
 Connect to an OIDC provider and authenticate users before configuring their kubeconfig
 
 ```sh
+KEYCLOAK_SECRET=4158b320-a82d-40e6-b239-01a83a2ae882
+
 {
 KEYCLOAK_CLIENT=kubernetes
-KEYCLOAK_SECRET=4158b320-a82d-40e6-b239-01a83a2ae882
 KEYCLOAK_REALM=https://keycloak.k8s.ironjab.com/auth/realms/cluster1
 KUBECLUSTER=https://api.cluster1.k8s.ironjab.com
 
@@ -140,6 +142,7 @@ KUBECLUSTER=https://api.cluster1.k8s.ironjab.com
 }
 ```
 > **or compile the application with your defaults**
+
 
 <!-- ### 4. Add Auth0 user admin rights
 ```sh
@@ -151,14 +154,6 @@ sed -i -e "s@{{AUTH0_USER_USERNAME}}@${AUTH0_USER_USERNAME}@g" src/admin-user/cl
 kubectl apply -f src/admin-user/clusterrolebinding.yaml
 }
 ``` -->
-
-<!-- ## Demo
-
-<p align="center">
-  <a target="_blank" href="https://asciinema.org/a/197034">
-  <img src="https://asciinema.org/a/197034.png" width="885"></image>
-  </a>
-</p> -->
 
 # What's next?
 

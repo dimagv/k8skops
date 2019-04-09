@@ -1,0 +1,69 @@
+def commitId
+def slackMessage
+
+pipeline {
+    agent {
+        label "insurancetruck"
+    }
+
+    environment {
+        REGISTRY = '{{REGISTRY}}'
+        REPOSITORY = '{{REPO}}'
+        NAMESPACE = '{{NAMESPACE}}'
+    }
+
+    stages {
+        stage('Prepare') {
+            steps {
+                checkout scm
+
+                script {
+                    commitId = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+                    slackMessage = { "*${currentBuild.currentResult}:* Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\n More info at: ${env.BUILD_URL}" }
+                }
+            }
+        }
+
+        stage('Build') {
+            when {
+                branch 'master'
+            }
+
+            steps {
+                container ('docker') {
+                    script {
+                        def imageDev = docker.build("${REPOSITORY}")
+                        docker.withRegistry("https://${REGISTRY}", "ecr:us-east-1:ecr-registry") {
+                            imageDev.push("${commitId}")
+                            imageDev.push("latest")
+                        }
+
+                        sh "docker rmi -f ${REGISTRY}/${REPOSITORY}:${commitId}"
+                        sh "docker rmi -f ${REGISTRY}/${REPOSITORY}:latest"
+                    }
+                }
+            }
+        }
+
+        stage ('Deploy Dev') {
+            when {
+                branch 'master'
+            }
+            
+            steps {
+                container ('helm') {
+                    sh "helm upgrade backend-${NAMESPACE} ./helm --install --set image.repository=${repository},image.tag=${commitId} --namespace=${NAMESPACE}"
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            slackSend (color: 'good', message: slackMessage())
+        }
+        failure {
+            slackSend (color: 'danger', message: slackMessage())
+        }
+    }
+}

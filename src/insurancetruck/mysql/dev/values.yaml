@@ -1,0 +1,101 @@
+## mysql image version
+## ref: https://hub.docker.com/r/library/mysql/tags/
+##
+image: "mysql"
+imageTag: "5.7.25"
+
+mysqlRootPassword: {{MYSQL_ROOT_PASS}}
+mysqlUser: {{MYSQL_USER}}
+mysqlPassword: {{MYSQL_PASS}}
+mysqlDatabase: {{MYSQL_DB}}
+mysqlAllowEmptyPassword: false
+
+imagePullPolicy: IfNotPresent
+
+extraVolumes: |
+  # - name: extras
+  #   emptyDir: {}
+
+extraVolumeMounts: |
+  # - name: extras
+  #   mountPath: /usr/share/extras
+  #   readOnly: true
+
+extraInitContainers: |
+  # - name: do-something
+  #   image: busybox
+  #   command: ['do', 'something']
+
+# Optionally specify an array of imagePullSecrets.
+# Secrets must be manually created in the namespace.
+# ref: https://kubernetes.io/docs/concepts/containers/images/#specifying-imagepullsecrets-on-a-pod
+# imagePullSecrets:
+  # - name: myRegistryKeySecretName
+
+## Node selector
+## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+nodeSelector: {}
+
+## Tolerations for pod assignment
+## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+##
+tolerations: []
+
+livenessProbe:
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  successThreshold: 1
+  failureThreshold: 3
+
+readinessProbe:
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 1
+  successThreshold: 1
+  failureThreshold: 3
+
+persistence:
+  enabled: true
+  accessMode: ReadWriteOnce
+  size: 8Gi
+  annotations: {}
+
+# resources:
+#   requests:
+#     memory: 256Mi
+#     cpu: 100m
+
+configurationFiles: {}
+#  mysql.cnf: |-
+#    [mysqld]
+#    skip-name-resolve
+#    ssl-ca=/ssl/ca.pem
+#    ssl-cert=/ssl/server-cert.pem
+#    ssl-key=/ssl/server-key.pem
+
+initializationFiles: {}
+#  first-db.sql: |-
+#    CREATE DATABASE IF NOT EXISTS first DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
+#  second-db.sql: |-
+#    CREATE DATABASE IF NOT EXISTS second DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
+
+metrics:
+  enabled: true
+  image: prom/mysqld-exporter
+  imageTag: v0.10.0
+  imagePullPolicy: IfNotPresent
+  resources: {}
+  annotations: {}
+    # prometheus.io/scrape: "true"
+    # prometheus.io/port: "9104"
+  livenessProbe:
+    initialDelaySeconds: 15
+    timeoutSeconds: 5
+  readinessProbe:
+    initialDelaySeconds: 5
+    timeoutSeconds: 1
+
+service:
+  type: ClusterIP
+  port: 3306

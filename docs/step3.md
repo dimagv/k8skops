@@ -105,8 +105,9 @@ helm install --name cert-manager --namespace cert-manager --version v0.7.0 jetst
 ```
 ```sh
 # issuer
-{
 EMAIL="example\@email.com" # backslash required
+
+{
 sed -i -e "s@{{EMAIL}}@${EMAIL}@g" src/cert-manager/issuer.yaml
 kubectl apply -f src/cert-manager/issuer.yaml
 }
@@ -126,13 +127,13 @@ vi ./src/autoscaler/cluster-autoscaler.sh
 ./src/autoscaler/cluster-autoscaler.sh
 ```
 
-<!-- ## Demo
+### 12. Deploy k8s-cleanup [link](https://github.com/onfido/k8s-cleanup)
+* Cleans up exited containers and dangling images/volumes running as a DaemonSet
+* Cleans up old replica sets, finished jobs and unrecycled evicted pods as a CronJob
 
-<p align="center">
-  <a target="_blank" href="https://asciinema.org/a/197030">
-  <img src="https://asciinema.org/a/197030.png" width="885"></image>
-  </a>
-</p> -->
+```sh
+kubectl -nkube-system create -f ./src/k8s-cleanup
+```
 
 # What's next?
 

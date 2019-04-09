@@ -1,0 +1,34 @@
+# Default values for vin.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: {{REPO}}
+  tag: latest
+  pullPolicy: Always
+
+service:
+  type: ClusterIP
+  port: 80
+
+mysqlHost: {{MYSQL_HOST}}
+mysqlRootPassword: {{MYSQL_ROOT_PASS}}
+mysqlUser: {{MYSQL_USER}}
+mysqlPassword: {{MYSQL_PASS}}
+mysqlDatabase: {{MYSQL_DB}}
+
+smtpHost: email-smtp.us-east-1.amazonaws.com
+smtpPort: 587
+smtpFrom: vin_service@insurancetruck.com
+smtpTo: artem.z1@ironjab.com
+smtpName: {{SMTP_NAME}}
+smtpPassword: {{SMTP_PASS}}
+
+vinLink: https://vintelligence3.polk.com/vindecoder/VinDecoderService
+vinName: {{VIN_NAME}}
+vinPass: {{VIN_PASS}}
+
+mainSite: {{MAIN_SITE}}
+mainPort: 80

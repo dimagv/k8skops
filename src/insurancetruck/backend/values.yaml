@@ -1,0 +1,47 @@
+# Default values for backend.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: {{REPO}}
+  tag: latest
+  pullPolicy: Always
+
+service:
+  type: ClusterIP
+  port: 80
+
+url: https://backend.{{NAMESPACE}}.{{DNS_ZONE}}/
+
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    certmanager.k8s.io/cluster-issuer: letsencrypt-prod
+    certmanager.k8s.io/acme-http01-ingress-class: nginx
+  hosts:
+    - host: backend.{{NAMESPACE}}.{{DNS_ZONE}}
+      paths:
+        - /
+  tls:
+    - secretName: backend-tls
+      hosts:
+        - backend.{{NAMESPACE}}.{{DNS_ZONE}}
+
+mysqlHost: {{MYSQL_HOST}}
+mysqlRootPassword: {{MYSQL_ROOT_PASS}}
+mysqlUser: {{MYSQL_USER}}
+mysqlPassword: {{MYSQL_PASS}}
+mysqlDatabase: {{MYSQL_DB}}
+
+redisHost: backend-{{NAMESPACE}}-redis-master
+redisPort: 6379
+redisPass: {{REDIS_PASS}}
+
+redis:
+  password: {{REDIS_PASS}}
+  cluster:
+    enabled: false
+    slaveCount: 0

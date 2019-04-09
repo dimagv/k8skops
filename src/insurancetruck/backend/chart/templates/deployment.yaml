@@ -1,0 +1,107 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "backend.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "backend.name" . }}
+    helm.sh/chart: {{ include "backend.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "backend.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "backend.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+          - name: http
+            containerPort: 80
+            protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /
+            port: http
+        readinessProbe:
+          httpGet:
+            path: /
+            port: http
+        resources:
+          {{- toYaml .Values.resources | nindent 12 }}
+        env:
+        - name: URL_1
+          value: {{ .Values.url }}
+        - name: REDIS_HOST
+          value: {{ .Values.redisHost }}
+        - name: REDIS_PORT
+          value: "{{ .Values.redisPort }}"
+        - name: REDIS_PASS
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "backend.fullname" . }}
+              key: redisPass
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "backend.fullname" . }}
+              key: mysqlRootPassword
+        - name: MYSQL_HOST
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "backend.fullname" . }}
+              key: mysqlHost
+        - name: MYSQL_PORT
+          value: "3306"
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "backend.fullname" . }}
+              key: mysqlUser
+        - name: MYSQL_PASS
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "backend.fullname" . }}
+              key: mysqlPass
+        - name: DB_1
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "backend.fullname" . }}
+              key: db1
+        - name: SITE_TYPE
+          value: IT
+        - name: xDebug
+          value: disabled
+        - name: CLEAN_ENV
+          value: "no"
+        - name: useSource
+          value: "no"
+        volumeMounts:
+        - name: httpd
+          mountPath: /etc/sysconfig/httpd
+          subPath: httpd
+        - name: vhost
+          mountPath: /etc/httpd/conf/sites-enabled/insurancetruck.vhost
+          subPath: insurancetruck.vhost
+      volumes:
+      - name: httpd
+        configMap:
+          name: {{ include "backend.fullname" . }}
+          items:
+          - key: httpd
+            path: httpd
+      - name: vhost
+        configMap:
+          name: {{ include "backend.fullname" . }}
+          items:
+          - key: vhost
+            path: insurancetruck.vhost
+      restartPolicy: Always

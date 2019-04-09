@@ -1,0 +1,32 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    app: prometheus-operator
+    release: prometheus-operator
+  name: prometheus-operator-cluster-autoscaler
+  namespace: monitoring
+spec:
+  groups:
+  - name: cluster-autoscaler
+    rules:
+    - alert: clusterAutoscalerScaleUp
+      annotations:
+        message: 'cluster autoscaler: triggered node Scale Up.'
+      expr: time()-cluster_autoscaler_last_activity{activity="scaleUp"} <= 30
+      labels:
+        severity: info
+    - alert: clusterAutoscalerScaleDown
+      annotations:
+        message: 'cluster autoscaler: triggered node Scale Down.'
+      expr: time()-cluster_autoscaler_last_activity{activity="scaleDown"} <= 30
+      labels:
+        severity: info
+    - alert: clusterAutoscalerUnschedulablePods
+      annotations:
+        message: 'cluster autoscaler: unschedulable pods ({{ $value
+        }}).'
+      expr: sum(cluster_autoscaler_unschedulable_pods_count) > 0
+      for: 3m
+      labels:
+        severity: warning
