@@ -52,7 +52,7 @@ pipeline {
 
             steps {
                 container ('helm') {
-                    sh "helm upgrade backend-${NAMESPACE} ./helm --install --set image.repository=${repository},image.tag=${commitId} --namespace=${NAMESPACE}"
+                    sh "helm upgrade backend-${NAMESPACE} ./helm --install --set image.repository=${REGISTRY}/${REPOSITORY},image.tag=${commitId} --namespace=${NAMESPACE}"
                 }
             }
         }
