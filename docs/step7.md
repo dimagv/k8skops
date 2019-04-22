@@ -73,10 +73,9 @@ docker push 532715861419.dkr.ecr.us-east-1.amazonaws.com/ironjab/it_aspire:lates
 #### 4.4. Push helm chart
 
 ```sh
-helm package src/insurancetruck/aspire/aspire
+helm package -d src/insurancetruck/aspire src/insurancetruck/aspire/aspire
 helm s3 push src/insurancetruck/aspire/aspire-0.1.0.tgz ironjab
 ```
-
 
 ### 5. Setup `service_vin` [link](http://54.152.51.78:10080/ironjab/service_vin)
 
@@ -119,7 +118,7 @@ docker push 532715861419.dkr.ecr.us-east-1.amazonaws.com/ironjab/service_vin:lat
 #### 5.4. Push helm chart
 
 ```sh
-helm package src/insurancetruck/vin/vin
+helm package -d src/insurancetruck/vin src/insurancetruck/vin/vin
 helm s3 push src/insurancetruck/vin/vin-0.1.0.tgz ironjab
 ```
 

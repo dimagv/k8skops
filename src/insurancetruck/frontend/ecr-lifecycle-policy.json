@@ -23,8 +23,7 @@
                 "tagStatus": "tagged",
                 "tagPrefixList": [
                     "master"
-                ],
-                "countUnit": "days"
+                ]
             },
             "description": "No more than 3 images for master branch",
             "rulePriority": 2
