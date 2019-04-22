@@ -55,10 +55,7 @@ spec:
               name: {{ include "backend.fullname" . }}
               key: mysqlRootPassword
         - name: MYSQL_HOST
-          valueFrom:
-            secretKeyRef:
-              name: {{ include "backend.fullname" . }}
-              key: mysqlHost
+          value: {{ .Values.mysqlHost }}
         - name: MYSQL_PORT
           value: "3306"
         - name: MYSQL_USER

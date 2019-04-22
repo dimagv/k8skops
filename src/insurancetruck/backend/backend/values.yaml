@@ -1,0 +1,111 @@
+# Default values for backend.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: 532715861419.dkr.ecr.us-east-1.amazonaws.com/ironjab/it_2.71_backend
+  tag: latest
+  pullPolicy: Always
+
+url: http://chart-example.local/
+
+ingress:
+  enabled: false
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    certmanager.k8s.io/cluster-issuer: letsencrypt-prod
+    certmanager.k8s.io/acme-http01-ingress-class: nginx
+  hosts:
+    - host: chart-example.local
+      paths: []
+  tls: []
+
+mysqlHost: mysql
+mysqlRootPassword: mysqlPass
+mysqlUser: dev
+mysqlPassword: mysqlPass
+mysqlDatabase: dev_insurance
+
+redisHost: redis-master
+redisPort: 6379
+redisPass: redisPass
+
+mysql:
+  image: "mysql"
+  imageTag: "5.7.25"
+  mysqlRootPassword: mysqlPass
+  mysqlUser: dev
+  mysqlPassword: mysqlPass
+  mysqlDatabase: dev_insurance
+  mysqlAllowEmptyPassword: false
+  imagePullPolicy: IfNotPresent
+  persistence:
+    enabled: true
+    size: 8Gi
+
+phpmyadmin:
+  db:
+    host: mysql
+    port: 3306
+  probesEnabled: false
+
+vin:
+  replicaCount: 1
+  image:
+    repository: 532715861419.dkr.ecr.us-east-1.amazonaws.com/ironjab/service_vin
+    tag: latest
+    pullPolicy: Always
+  mysqlHost: mysql
+  mysqlRootPassword: mysqlPass
+  mysqlUser: dev
+  mysqlPassword: mysqlPass
+  mysqlDatabase: dev_insurance
+  smtpHost: email-smtp.us-east-1.amazonaws.com
+  smtpPort: 587
+  smtpFrom: vin_service@insurancetruck.com
+  smtpTo: artem.z1@ironjab.com
+  smtpName: smtpName
+  smtpPassword: smtpPass
+  vinLink: https://vintelligence3.polk.com/vindecoder/VinDecoderService
+  vinName: vinName
+  vinPass: vinPass
+  mainSite: chart-example.local
+  mainPort: 80
+
+aspire:
+  replicaCount: 1
+  image:
+    repository: 532715861419.dkr.ecr.us-east-1.amazonaws.com/ironjab/it_aspire
+    tag: latest
+    pullPolicy: Always
+  mysqlHost: mysql
+  mysqlRootPassword: mysqlPass
+  mysqlUser: dev
+  mysqlPassword: mysqlPass
+  mysqlDatabase: dev_insurance
+  mainSite: chart-example.local
+  mainPort: 80
+  smtpHost: email-smtp.us-east-1.amazonaws.com
+  smtpPort: 587
+  smtpFrom: vin_service@insurancetruck.com
+  smtpTo1: artem.z1@ironjab.com
+  smtpTo2: artem.z1@ironjab.com
+  smtpName: smtpName
+  smtpPassword: smtpPassword
+  pushKey: pushKey
+  pushLink: https://www.maple-tech.com/ctcstaging/services/createApp                            
+  pushStatusLink: https://www.maple-tech.com/ctcstaging/services/quoteStatusQuery              
+  pushMvrLink: https://www.maple-tech.com/ctcstaging/services/getMVR                           
+  push: enabled 
+
+redis:
+  password: redisPass
+  cluster:
+    enabled: false
+    slaveCount: 0
+  master:
+    persistence:
+      enabled: true
+      size: 8Gi

@@ -89,7 +89,7 @@ helm install --name jenkins stable/jenkins -f src/jenkins/values.yaml --namespac
     ```sh
     {
     # it-backend
-    cp -r src/insurancetruck/backend/chart it_2.71_backend/helm
+    cp -r src/insurancetruck/backend/backend it_2.71_backend/helm
     cp src/insurancetruck/backend/values.yaml it_2.71_backend/helm # values.yaml should be configured from the previous step7
     cd it_2.71_backend 
     git add . && git commit -m "add ci/cd" && git push origin master
@@ -100,7 +100,7 @@ helm install --name jenkins stable/jenkins -f src/jenkins/values.yaml --namespac
     # it-frontend
     sed -i -e "s@'process.env.API_URL'.*@'process.env.API_URL': JSON.stringify('https://backend.${NAMESPACE}.${DNS_ZONE}'),@g" it_2.71_frontend/webpack.dev.config.js
 
-    cp -r src/insurancetruck/frontend/chart it_2.71_frontend/helm
+    cp -r src/insurancetruck/frontend/frontend it_2.71_frontend/helm
     cp src/insurancetruck/frontend/values.yaml it_2.71_frontend/helm # values.yaml should be configured from the previous step7
     cd it_2.71_frontend
     git add . && git commit -m "add ci/cd" && git push origin master
@@ -141,21 +141,13 @@ helm install --name jenkins stable/jenkins -f src/jenkins/values.yaml --namespac
                     name: 'docker', 
                     image: 'docker:18.06.3',
                     ttyEnabled: true,
-                    command: 'cat',
-                    resourceRequestCpu: '250m',
-                    resourceLimitCpu: '250m',
-                    resourceRequestMemory: '256Mi',
-                    resourceLimitMemory: '512Mi'
+                    command: 'cat'
                 ),
                 containerTemplate(
                     name: 'helm', 
                     image: 'lachlanevenson/k8s-helm:v2.13.1',
                     ttyEnabled: true,
-                    command: 'cat',
-                    resourceRequestCpu: '250m',
-                    resourceLimitCpu: '250m',
-                    resourceRequestMemory: '256Mi',
-                    resourceLimitMemory: '512Mi'
+                    command: 'cat'
                 )
             ],
             volumes: [
@@ -165,6 +157,40 @@ helm install --name jenkins stable/jenkins -f src/jenkins/values.yaml --namespac
                 )
             ]
         )
+        ```
+        
+    * Timeout in seconds for Jenkins connection: 600
+    * Raw yaml for the Pod:
+
+        ```sh
+        apiVersion: v1
+        kind: Pod
+        metadata:
+        labels:
+            jenkins: slave
+            jenkins/insurancetruck: "true"
+        spec:
+        nodeSelector:
+            kops.k8s.io/instancegroup: nodes-jenkins-spot
+        tolerations:
+        - key: dedicated
+            operator: Equal
+            value: jenkins
+            effect: NoSchedule
+        affinity:
+            podAntiAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                - key: jenkins
+                    operator: In
+                    values:
+                    - slave
+                - key: jenkins/insurancetruck
+                    operator: In
+                    values:
+                    - "true"
+                topologyKey: "kubernetes.io/hostname"
         ```
 
 4. Configure slack plugin
@@ -203,8 +229,8 @@ helm install --name jenkins stable/jenkins -f src/jenkins/values.yaml --namespac
     
         ```sh
         Type: Git
-        Project Repository: http://54.152.51.78:10080/ironjab/it_2.71_backend
-                            http://54.152.51.78:10080/ironjab/it_2.71_frontend
+        Project Repository: ssh://git@54.152.51.78:10022/ironjab/it_2.71_backend.git
+                            ssh://git@54.152.51.78:10022/ironjab/it_2.71_frontend.git
         Credentials: gogs
         ```
 

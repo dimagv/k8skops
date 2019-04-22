@@ -2,28 +2,13 @@
 
 # Step 3. Configure cluster
 
-### 1. Set environment variables
-```sh
-export NAMESPACE=insurancetruck-dev
-```
-> Note: If you want to change namespace name change also RBAC `src/rbac/insurancetruck-dev-admins.yaml`
+### 1. Create RBAC
 
-### 2. Create namespace
-```sh
-kubectl create namespace $NAMESPACE
-```
-
-<!-- ### 3. Create PodSecurityPolicy
-```sh
-kubectl create -f src/psp
-``` -->
-
-### 3. Create RBAC
 ```sh
 kubectl create -f src/rbac
 ```
 
-### 4. Helm [link](https://github.com/helm/helm)
+### 2. Helm [link](https://github.com/helm/helm)
 `Helm` helps you manage Kubernetes applications — Helm Charts helps you define, install, and upgrade even the most complex Kubernetes application.
 Charts are easy to create, version, share, and publish — so start using Helm and stop the copy-and-paste madness.
 
@@ -36,7 +21,7 @@ helm init --service-account tiller
 }
 ```
 
-### 5. Kube2iam [link](https://github.com/jtblin/kube2iam)
+### 3. Kube2iam [link](https://github.com/jtblin/kube2iam)
 Provide IAM credentials to containers running inside a kubernetes cluster based on annotations.
 
 ```sh
@@ -46,7 +31,7 @@ helm install stable/kube2iam --namespace kube-system --name kube2iam --set=extra
 }
 ```
 
-### 6. Expanding Persistent Volumes Claims [link](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#expanding-persistent-volumes-claims)
+### 4. Expanding Persistent Volumes Claims [link](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#expanding-persistent-volumes-claims)
 Expanding in-use PVCs is an alpha feature. To use it, enable the ExpandInUsePersistentVolumes feature gate. In this case, you don’t need to delete and recreate a Pod or deployment that is using an existing PVC. Any in-use PVC automatically becomes available to its Pod as soon as its file system has been expanded. This feature has no effect on PVCs that are not in use by a Pod or deployment. You must create a Pod which uses the PVC before the expansion can complete.
 
 ```sh
@@ -55,7 +40,7 @@ kubectl apply -f src/storage-class/gp2-resize-storage-class.yaml
 ```
 > Note: Expanding EBS volumes is a time consuming operation. Also, there is a per-volume quota of one modification every 6 hours.
 
-### 7. Metrics-server [link](https://kubernetes.io/docs/tasks/debug-application-cluster/core-metrics-pipeline/)
+### 5. Metrics-server [link](https://kubernetes.io/docs/tasks/debug-application-cluster/core-metrics-pipeline/)
 Starting from Kubernetes 1.8, resource usage metrics, such as container CPU and memory usage, are available in Kubernetes through the Metrics API. These metrics can be either accessed directly by user, for example by using kubectl top command, or used by a controller in the cluster, e.g. Horizontal Pod Autoscaler, to make decisions.
 
 ```sh
@@ -65,7 +50,7 @@ kubectl apply -f src/metrics-server/v1.8.x.yaml
 kubectl get --raw /apis/metrics.k8s.io/v1beta1/nodes
 ```
 
-### 8. Ingress [link](https://kubernetes.io/docs/concepts/services-networking/ingress/)
+### 6. Ingress [link](https://kubernetes.io/docs/concepts/services-networking/ingress/)
 An API object that manages external access to the services in a cluster, typically HTTP.
 `Ingress` can provide load balancing, SSL termination and name-based virtual hosting.
 
@@ -76,7 +61,7 @@ helm install stable/nginx-ingress --name nginx-ingress -f src/nginx-ingress/valu
 }
 ```
 
-### 9. ExternalDNS [link](https://github.com/kubernetes-incubator/external-dns)
+### 7. ExternalDNS [link](https://github.com/kubernetes-incubator/external-dns)
 Configure external DNS servers (AWS Route53, Google CloudDNS and others) for Kubernetes Ingresses and Services.
 `ExternalDNS` synchronizes exposed Kubernetes Services and Ingresses with DNS providers.
 
@@ -89,7 +74,7 @@ vi src/external-dns/external-dns.sh
 ./src/external-dns/external-dns.sh 
 ```
 
-### 10. Cert-manager [link](https://github.com/jetstack/cert-manager)
+### 8. Cert-manager [link](https://github.com/jetstack/cert-manager)
 Automatically provision and manage TLS certificates in Kubernetes.
 
 ```sh
@@ -113,7 +98,7 @@ kubectl apply -f src/cert-manager/issuer.yaml
 }
 ```
 
-### 11. Cluster Autoscaler [link](https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler)
+### 9. Cluster Autoscaler [link](https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler)
 Cluster Autoscaler is a tool that automatically adjusts the size of the Kubernetes cluster when one of the following conditions is true:
 * there are pods that failed to run in the cluster due to insufficient resources,
 * there are nodes in the cluster that have been underutilized for an extended period of time and their pods can be placed on other existing nodes.
@@ -127,7 +112,7 @@ vi ./src/autoscaler/cluster-autoscaler.sh
 ./src/autoscaler/cluster-autoscaler.sh
 ```
 
-### 12. Deploy k8s-cleanup [link](https://github.com/onfido/k8s-cleanup)
+### 10. Deploy k8s-cleanup [link](https://github.com/onfido/k8s-cleanup)
 * Cleans up exited containers and dangling images/volumes running as a DaemonSet
 * Cleans up old replica sets, finished jobs and unrecycled evicted pods as a CronJob
 

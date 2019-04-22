@@ -315,6 +315,34 @@ spec:
 ---
 
 apiVersion: kops/v1alpha2
+kind: InstanceGroup
+metadata:
+  labels:
+    kops.k8s.io/cluster: {{.name}}.{{.dnsZone}}
+  name: nodes-jenkins-spot
+spec:
+  image: {{.spotImage}}
+  machineType: {{.spotMachineType}}
+  maxPrice: {{.spotMaxPrice}}
+  maxSize: {{.spotMaxSize}}
+  minSize: {{.spotMinSize}}
+  nodeLabels:
+    kops.k8s.io/instancegroup: nodes-jenkins-spot
+  role: Node
+  rootVolumeSize: 8
+  taints:
+  - dedicated=jenkins:NoSchedule
+  subnets:
+  - us-east-1a
+  - us-east-1b
+  - us-east-1c
+  cloudLabels:
+    k8s.io/cluster-autoscaler/enabled: "true"
+    kubernetes.io/cluster/cluster1.k8s.ironjab.com: ""
+
+---
+
+apiVersion: kops/v1alpha2
 kind: SSHCredential
 metadata:
   labels:

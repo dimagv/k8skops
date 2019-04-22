@@ -1,0 +1,16 @@
+dependencies:
+- name: mysql
+  version: "0.15.0"
+  repository: "https://kubernetes-charts.storage.googleapis.com"
+- name: phpmyadmin
+  version: "2.2.0"
+  repository: "https://kubernetes-charts.storage.googleapis.com"
+- name: redis
+  version: "6.4.4"
+  repository: "https://kubernetes-charts.storage.googleapis.com"
+- name: vin
+  version: "0.1.0"
+  repository: "s3://ironjab-k8s-charts"
+- name: aspire
+  version: "0.1.0"
+  repository: "s3://ironjab-k8s-charts"

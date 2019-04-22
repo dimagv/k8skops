@@ -1,0 +1,46 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "backend.fullname" . }}-migrations-job
+  labels:
+    app.kubernetes.io/name: {{ include "backend.name" . }}
+    helm.sh/chart: {{ include "backend.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  annotations:
+    # helm.sh/hook: post-install,post-upgrade
+    # helm.sh/hook-delete-policy: before-hook-creation
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      containers:
+      - name: migrations
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        workingDir: /var/migrate
+        command: ['vendor/bin/phinx']
+        args: ['migrate', '-e', 'production']
+        env:
+        - name: MYSQL_DB_NAME
+          value: {{ .Values.mysqlDatabase }}
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "backend.fullname" . }}
+              key: mysqlRootPassword
+        - name: MYSQL_HOST
+          value: {{ .Values.mysqlHost }}
+        - name: MYSQL_PORT
+          value: "3306"
+        - name: MYSQL_USER_NAME
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "backend.fullname" . }}
+              key: mysqlUser
+        - name: MYSQL_USER_PASS
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "backend.fullname" . }}
+              key: mysqlPass
+      restartPolicy: Never

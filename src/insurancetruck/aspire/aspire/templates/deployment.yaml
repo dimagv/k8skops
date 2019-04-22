@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "vin.fullname" . }}
+  name: {{ include "aspire.fullname" . }}
   labels:
-    app.kubernetes.io/name: {{ include "vin.name" . }}
-    helm.sh/chart: {{ include "vin.chart" . }}
+    app.kubernetes.io/name: {{ include "aspire.name" . }}
+    helm.sh/chart: {{ include "aspire.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "vin.name" . }}
+      app.kubernetes.io/name: {{ include "aspire.name" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ include "vin.name" . }}
+        app.kubernetes.io/name: {{ include "aspire.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       containers:
@@ -29,29 +29,26 @@ spec:
           - name: MYSQL_ROOT_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: {{ include "vin.fullname" . }}
+                name: {{ include "aspire.fullname" . }}
                 key: mysqlRootPassword
           - name: MYSQL_HOST
-            valueFrom:
-              secretKeyRef:
-                name: {{ include "vin.fullname" . }}
-                key: mysqlHost
+            value: {{ .Values.mysqlHost }}
           - name: MYSQL_PORT
             value: "3306"
           - name: MYSQL_USER
             valueFrom:
               secretKeyRef:
-                name: {{ include "vin.fullname" . }}
+                name: {{ include "aspire.fullname" . }}
                 key: mysqlUser
           - name: MYSQL_PASS
             valueFrom:
               secretKeyRef:
-                name: {{ include "vin.fullname" . }}
+                name: {{ include "aspire.fullname" . }}
                 key: mysqlPass
-          - name: DB_NAME
+          - name: MYSQL_DB_NAME
             valueFrom:
               secretKeyRef:
-                name: {{ include "vin.fullname" . }}
+                name: {{ include "aspire.fullname" . }}
                 key: dbName
           - name: SMTP_HOST
             value: {{ .Values.smtpHost }}
@@ -59,30 +56,33 @@ spec:
             value: "{{ .Values.smtpPort }}"
           - name: SMTP_FROM
             value: {{ .Values.smtpFrom }}
-          - name: SMTP_TO
-            value: {{ .Values.smtpTo }}
+          - name: SMTP_TO_1
+            value: {{ .Values.smtpTo1 }}
+          - name: SMTP_TO_2
+            value: {{ .Values.smtpTo2 }}
           - name: SMTP_NAME
             valueFrom:
               secretKeyRef:
-                name: {{ include "vin.fullname" . }}
+                name: {{ include "aspire.fullname" . }}
                 key: smtpName
           - name: SMTP_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: {{ include "vin.fullname" . }}
+                name: {{ include "aspire.fullname" . }}
                 key: smtpPassword
-          - name: VIN_LINK
-            value: {{ .Values.vinLink }}
-          - name: VIN_NAME
+          - name: PUSH
+            value: {{ .Values.push }}
+          - name: PUSH_LINK
+            value: {{ .Values.pushLink }}
+          - name: PUSH_STATUS_LINK
+            value: {{ .Values.pushStatusLink }}
+          - name: PUSH_MVR_LINK
+            value: {{ .Values.pushMvrLink }}
+          - name: PUSH_KEY
             valueFrom:
               secretKeyRef:
-                name: {{ include "vin.fullname" . }}
-                key: vinName
-          - name: VIN_PASS
-            valueFrom:
-              secretKeyRef:
-                name: {{ include "vin.fullname" . }}
-                key: vinPass
+                name: {{ include "aspire.fullname" . }}
+                key: pushKey
           - name: MAIN_SITE
             value: {{ .Values.mainSite }}
           - name: MAIN_PORT

@@ -249,18 +249,18 @@ ID=$(uuidgen) && aws route53 create-hosted-zone --name subdomain.example.com --c
 * Create AWS Route53 Hosted Zone
 
 ```bash
-$ ID=$(uuidgen) && aws route53 create-hosted-zone --name example.com --caller-reference $ID
+ID=$(uuidgen) && aws route53 create-hosted-zone --name example.com --caller-reference $ID
 ```
 * Get NS record of the created Zone
 
 ```bash
 # get zone Id
-$ aws route53 list-hosted-zones | jq '.HostedZones[] | select(.Name=="example.com.") | .Id'
+aws route53 list-hosted-zones | jq '.HostedZones[] | select(.Name=="example.com.") | .Id'
 Output:
 "/hostedzone/Z3GF3B4D6NF0R2"
 
 # get zone NS record
-$ aws route53 list-resource-record-sets --hosted-zone-id /hostedzone/Z3GF3B4D6NF0R2 --query "ResourceRecordSets[?Type == 'NS'].ResourceRecords" --output=text
+aws route53 list-resource-record-sets --hosted-zone-id /hostedzone/Z3GF3B4D6NF0R2 --query "ResourceRecordSets[?Type == 'NS'].ResourceRecords" --output=text
 Output:
 ns-1720.awsdns-23.co.uk.                          
 ns-833.awsdns-40.net.                             
@@ -301,9 +301,9 @@ with the cluster's DNS.
 Kops s3 bucket
 ```sh
 # create s3 bucket
-$ aws s3api create-bucket --bucket ironjab-k8s-ss --region us-east-1
+aws s3api create-bucket --bucket ironjab-k8s-ss --region us-east-1
 # enable s3 bucket versioning
-$ aws s3api put-bucket-versioning --bucket ironjab-k8s-ss --versioning-configuration Status=Enabled
+aws s3api put-bucket-versioning --bucket ironjab-k8s-ss --versioning-configuration Status=Enabled
 ```
 
 # What's next?
