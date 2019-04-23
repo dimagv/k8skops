@@ -89,8 +89,7 @@ helm install --name jenkins stable/jenkins -f src/jenkins/values.yaml --namespac
     ```sh
     {
     # it-backend
-    cp -r src/insurancetruck/backend/backend it_2.71_backend/helm
-    cp src/insurancetruck/backend/values.yaml it_2.71_backend/helm # values.yaml should be configured from the previous step7
+    cp -r src/insurancetruck/backend it_2.71_backend/helm
     cd it_2.71_backend 
     git add . && git commit -m "add ci/cd" && git push origin master
     cd ..
@@ -100,8 +99,7 @@ helm install --name jenkins stable/jenkins -f src/jenkins/values.yaml --namespac
     # it-frontend
     sed -i -e "s@'process.env.API_URL'.*@'process.env.API_URL': JSON.stringify('https://backend.${NAMESPACE}.${DNS_ZONE}'),@g" it_2.71_frontend/webpack.dev.config.js
 
-    cp -r src/insurancetruck/frontend/frontend it_2.71_frontend/helm
-    cp src/insurancetruck/frontend/values.yaml it_2.71_frontend/helm # values.yaml should be configured from the previous step7
+    cp -r src/insurancetruck/frontend it_2.71_frontend/helm
     cd it_2.71_frontend
     git add . && git commit -m "add ci/cd" && git push origin master
     cd ..
@@ -163,34 +161,34 @@ helm install --name jenkins stable/jenkins -f src/jenkins/values.yaml --namespac
     * Raw yaml for the Pod:
 
         ```sh
-        apiVersion: v1
-        kind: Pod
-        metadata:
-        labels:
-            jenkins: slave
-            jenkins/insurancetruck: "true"
-        spec:
-        nodeSelector:
-            kops.k8s.io/instancegroup: nodes-jenkins-spot
-        tolerations:
-        - key: dedicated
-            operator: Equal
-            value: jenkins
-            effect: NoSchedule
-        affinity:
-            podAntiAffinity:
-            requiredDuringSchedulingIgnoredDuringExecution:
-            - labelSelector:
-                matchExpressions:
-                - key: jenkins
-                    operator: In
-                    values:
-                    - slave
-                - key: jenkins/insurancetruck
-                    operator: In
-                    values:
-                    - "true"
-                topologyKey: "kubernetes.io/hostname"
+            apiVersion: v1
+            kind: Pod
+            metadata:
+            labels:
+                jenkins: slave
+                jenkins/insurancetruck: "true"
+            spec:
+            nodeSelector:
+                kops.k8s.io/instancegroup: nodes-jenkins-spot
+            tolerations:
+            - key: dedicated
+                operator: Equal
+                value: jenkins
+                effect: NoSchedule
+            affinity:
+                podAntiAffinity:
+                requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchExpressions:
+                    - key: jenkins
+                        operator: In
+                        values:
+                        - slave
+                    - key: jenkins/insurancetruck
+                        operator: In
+                        values:
+                        - "true"
+                    topologyKey: "kubernetes.io/hostname"
         ```
 
 4. Configure slack plugin

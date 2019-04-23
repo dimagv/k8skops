@@ -1,9 +1,16 @@
 def commitId
+def tag
 def slackMessage
+def shouldBuild = 1
 
 pipeline {
-    agent {
-        label "insurancetruck"
+    agent { label "insurancetruck" }
+
+    options {
+        timestamps()
+        timeout(time: 10, unit: 'MINUTES')
+        retry(2)
+        disableConcurrentBuilds()
     }
 
     environment {
@@ -18,52 +25,52 @@ pipeline {
                 checkout scm
 
                 script {
+                    shouldBuild = sh (script: "git log -1 | grep '.*\\[ci-skip\\].*'", returnStatus: true) 
                     commitId = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+                    tag = "${env.BRANCH_NAME}-${commitId}"
                     slackMessage = { "*${currentBuild.currentResult}:* Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\n More info at: ${env.BUILD_URL}" }
                 }
             }
         }
 
         stage('Build') {
-            when {
-                branch 'master'
-            }
+            when { allOf {    
+                anyOf { 
+                    branch 'master' 
+                }
+                expression { shouldBuild }
+            }}
 
             steps {
                 container ('docker') {
                     script {
                         def imageDev = docker.build("${REPOSITORY}")
                         docker.withRegistry("https://${REGISTRY}", "ecr:us-east-1:ecr-registry") {
-                            imageDev.push("${commitId}")
-                            imageDev.push("latest")
+                            imageDev.push("${tag}")
                         }
 
-                        sh "docker rmi -f ${REGISTRY}/${REPOSITORY}:${commitId}"
-                        sh "docker rmi -f ${REGISTRY}/${REPOSITORY}:latest"
+                        sh "docker rmi -f ${REGISTRY}/${REPOSITORY}:${tag}"
                     }
                 }
             }
         }
 
-        stage ('Deploy Dev') {
-            when {
-                branch 'master'
-            }
-            
+        stage ('Deploy: master') {
+            when { allOf {
+                branch 'master' 
+                expression { shouldBuild }
+            }}
+
             steps {
                 container ('helm') {
-                    sh "helm upgrade frontend-${NAMESPACE} ./helm --install --wait --timeout 900 --set image.repository=${REGISTRY}/${REPOSITORY},image.tag=${commitId} --namespace=${NAMESPACE}"
+                    sh "helm upgrade frontend-${NAMESPACE} ./helm --install --force --wait --timeout 600 --set image.repository=${REGISTRY}/${REPOSITORY},image.tag=${tag} --namespace=${NAMESPACE}"
                 }
             }
         }
     }
 
     post {
-        success {
-            slackSend (color: 'good', message: slackMessage())
-        }
-        failure {
-            slackSend (color: 'danger', message: slackMessage())
-        }
+        success { slackSend (color: 'good', message: slackMessage()) }
+        failure { slackSend (color: 'danger', message: slackMessage()) }
     }
 }

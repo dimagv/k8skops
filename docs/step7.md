@@ -50,7 +50,7 @@ Output:
     }
 }
 
-aws ecr put-lifecycle-policy --repository-name ironjab/it_aspire --lifecycle-policy-text file://src/insurancetruck/aspire/ecr-lifecycle-policy.json
+aws ecr put-lifecycle-policy --repository-name ironjab/it_aspire --lifecycle-policy-text file://src/insurancetruck/ecr-lifecycle-policy/aspire.json
 ```
 
 #### 4.2. Build docker image
@@ -95,7 +95,7 @@ Output:
     }
 }
 
-aws ecr put-lifecycle-policy --repository-name ironjab/service_vin --lifecycle-policy-text file://src/insurancetruck/vin/ecr-lifecycle-policy.json
+aws ecr put-lifecycle-policy --repository-name ironjab/service_vin --lifecycle-policy-text file://src/insurancetruck/ecr-lifecycle-policy/vin.json
 ```
 
 #### 5.2. Build docker image
@@ -141,7 +141,7 @@ Output:
     }
 }
 
-aws ecr put-lifecycle-policy --repository-name ironjab/it_2.71_backend --lifecycle-policy-text file://src/insurancetruck/backend/ecr-lifecycle-policy.json
+aws ecr put-lifecycle-policy --repository-name ironjab/it_2.71_backend --lifecycle-policy-text file://src/insurancetruck/ecr-lifecycle-policy/backend.json
 ```
 
 #### 6.2. Build docker image
@@ -202,7 +202,7 @@ helm install --name backend-$NAMESPACE --dep-up -f src/insurancetruck/backend/va
 #### 6.5. Import Mysql DB
 
 ```sh
-kubectl run mysql-client --image=mysql:5.7 -i --rm --restart=Never --namespace $NAMESPACE -- mysql -h backend-$NAMESPACE-mysql -uroot -pdev2016 dev_insurance < src/insurancetruck/mysql/dev/dev_insurance.sql
+kubectl run mysql-client --image=mysql:5.7 -i --rm --restart=Never --namespace $NAMESPACE -- mysql -h backend-$NAMESPACE-mysql -uroot -pdev2016 dev_insurance < src/insurancetruck/mysql/dev_insurance.sql
 
 # test
 kubectl run mysql-client --image=mysql:5.7 -it --rm --restart=Never --namespace $NAMESPACE -- mysql -h backend-$NAMESPACE-mysql -uroot -pdev2016 dev_insurance -e 'SHOW TABLES;'
@@ -225,7 +225,7 @@ Output:
     }
 }
 
-aws ecr put-lifecycle-policy --repository-name ironjab/it_2.71_frontend --lifecycle-policy-text file://src/insurancetruck/frontend/ecr-lifecycle-policy.json
+aws ecr put-lifecycle-policy --repository-name ironjab/it_2.71_frontend --lifecycle-policy-text file://src/insurancetruck/ecr-lifecycle-policy/frontend.json
 ```
 
 #### 7.2. Build docker image
