@@ -1,0 +1,18 @@
+dependencies:
+- name: mysql
+  repository: https://kubernetes-charts.storage.googleapis.com
+  version: 0.15.0
+- name: phpmyadmin
+  repository: https://kubernetes-charts.storage.googleapis.com
+  version: 2.2.0
+- name: redis
+  repository: https://kubernetes-charts.storage.googleapis.com
+  version: 6.4.4
+- name: vin
+  repository: s3://ironjab-k8s-charts
+  version: 0.1.0
+- name: aspire
+  repository: s3://ironjab-k8s-charts
+  version: 0.1.0
+digest: sha256:14e50db9565b4363d6f0892c25b31abf2db47071f7ddfcdae096261a26184e8e
+generated: 2019-04-23T15:07:22.325600565+03:00
