@@ -85,7 +85,7 @@ vin:
   vinLink: https://vintelligence3.polk.com/vindecoder/VinDecoderService
   vinName: {{VIN_NAME}}
   vinPass: {{VIN_PASS}}
-  mainSite: backend-{{NAMESPACE}}
+  mainSite: backend-{{NAMESPACE}}-it-backend
   mainPort: 80
 
 aspire:
@@ -99,7 +99,7 @@ aspire:
   mysqlUser: {{MYSQL_USER}}
   mysqlPassword: {{MYSQL_PASS}}
   mysqlDatabase: {{MYSQL_DB}}
-  mainSite: backend-{{NAMESPACE}}
+  mainSite: backend-{{NAMESPACE}}-it-backend
   mainPort: 80
   smtpHost: email-smtp.us-east-1.amazonaws.com
   smtpPort: 587
