@@ -36,6 +36,9 @@ redisHost: redis-master
 redisPort: 6379
 redisPass: redisPass
 
+migrations:
+  enabled: false
+
 mysql:
   image: "mysql"
   imageTag: "5.7.25"

@@ -32,6 +32,9 @@ redisHost: backend-{{NAMESPACE}}-redis-master
 redisPort: 6379
 redisPass: {{REDIS_PASS}}
 
+migrations:
+  enabled: false
+
 mysql:
   image: "mysql"
   imageTag: "5.7.25"

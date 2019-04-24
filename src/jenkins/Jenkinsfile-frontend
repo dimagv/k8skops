@@ -63,7 +63,7 @@ pipeline {
 
             steps {
                 container ('helm') {
-                    sh "helm upgrade frontend-${NAMESPACE} ./helm/frontend --install --wait --timeout 600 --set image.repository=${REGISTRY}/${REPOSITORY},image.tag=${tag} --namespace=${NAMESPACE}"
+                    sh "helm upgrade frontend-${NAMESPACE} ./helm/frontend --install --wait --timeout 600 --namespace=${NAMESPACE} -f ./helm/values.yaml --set image.repository=${REGISTRY}/${REPOSITORY},image.tag=${tag}"
                 }
             }
         }
