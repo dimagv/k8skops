@@ -50,7 +50,7 @@ pipeline {
                         }
 
                         sh "docker rmi -f ${REGISTRY}/${REPOSITORY}:${tag}"
-                        sh "docker rmi -f ${REGISTRY}/${REPOSITORY}:latest"
+                        sh "docker rmi -f ${REPOSITORY}:latest"
                     }
                 }
             }
