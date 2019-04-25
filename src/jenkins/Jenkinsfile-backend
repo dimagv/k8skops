@@ -44,13 +44,12 @@ pipeline {
             steps {
                 container ('docker') {
                     script {
-                        def imageDev = docker.build("${REPOSITORY}")
+                        def imageDev = docker.build("${REGISTRY}/${REPOSITORY}:${tag}")
                         docker.withRegistry("https://${REGISTRY}", "ecr:us-east-1:ecr-registry") {
                             imageDev.push("${tag}")
                         }
 
                         sh "docker rmi -f ${REGISTRY}/${REPOSITORY}:${tag}"
-                        sh "docker rmi -f ${REPOSITORY}:latest"
                     }
                 }
             }
