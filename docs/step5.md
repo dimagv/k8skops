@@ -25,7 +25,15 @@ kubectl create namespace monitoring
 kubectl apply -f src/prometheus-operator/prev/psp.yaml
 ``` -->
 
-#### 2.2. Prometheus-operator
+#### 2.2. Create ETCD secret from the master node
+```sh
+# ssh to master
+kubectl --namespace monitoring create secret generic prometheus-operator-etcd --from-file=ca=/etc/kubernetes/pki/kube-apiserver/etcd-ca.crt --from-file=cert=/etc/kubernetes/pki/kube-apiserver/etcd-client.crt --from-file=key=/etc/kubernetes/pki/kube-apiserver/etcd-client.key
+```
+
+
+
+#### 2.3. Prometheus-operator
 ```sh
 ALERTMANAGER_SLACK_API_URL=https://hooks.slack.com/services/... # https://api.slack.com/apps
 ALERTMANAGER_SLACK_CHANNEL=ironjab-alertmanager
@@ -48,7 +56,7 @@ helm install --name prometheus-operator stable/prometheus-operator -f src/promet
 }
 ```
 
-#### 2.3. Create custom servicemonitors and rules
+#### 2.4. Create custom servicemonitors and rules
 > For scraping `etcd` metrics open 4001/4002 ports in the aws masters sg!
 
 ```sh

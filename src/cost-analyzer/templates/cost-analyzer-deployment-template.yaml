@@ -1,0 +1,110 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "cost-analyzer.fullname" . }}
+  labels:
+    app: cost-analyzer
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+spec:
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: cost-analyzer
+{{- if .Values.global.podAnnotations}}
+      annotations:
+{{- with .Values.global.podAnnotations }}
+{{ toYaml . | indent 8 }}
+{{- end }}
+{{- end }}
+    spec:
+      restartPolicy: Always
+      serviceAccountName: {{ template "cost-analyzer.fullname" . }}
+      volumes:
+        - name: nginx-conf
+          configMap:
+            name: nginx-conf
+            items:
+              - key: nginx.conf
+                path: default.conf
+        - name: persistent-configs
+          persistentVolumeClaim: 
+            claimName: {{ template "cost-analyzer.fullname" . }}
+      containers:
+        - image: ajaytripathy/kubecost-frontend:prod-{{ $.Chart.Version }}
+          name: cost-analyzer-frontend
+          volumeMounts:
+            - name: nginx-conf
+              mountPath: /etc/nginx/conf.d/
+          resources:
+            requests:
+              cpu: "10m"
+              memory: "55Mi"
+            limits:
+              cpu: "100m"
+              memory: "256Mi"
+        - image: 'ajaytripathy/kubecost:prod-{{ $.Chart.Version }}'
+          resources:
+            requests:
+              cpu: "10m"
+              memory: "55Mi"
+            limits:
+              cpu: "100m"
+              memory: "256Mi"
+          name: cost-analyzer-server
+          volumeMounts:
+            - name: persistent-configs
+              mountPath: /var/configs
+          env:
+            - name: PROMETHEUS_SERVER_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "cost-analyzer.fullname" . }}
+                  key: prometheus-server-endpoint
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /var/configs/key.json
+            - name: KUBECOST_TOKEN
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "cost-analyzer.fullname" . }}
+                  key: kubecost-token
+        - image: 'ajaytripathy/kubecost-cost-model:prod-{{ $.Chart.Version }}'
+          name: cost-model
+          requests:
+            cpu: "10m"
+            memory: "55Mi"
+          limits:
+            cpu: "800m"
+            memory: "256Mi"
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 9003
+            initialDelaySeconds: 3
+            periodSeconds: 10
+            failureThreshold: 20
+          volumeMounts:
+            - name: persistent-configs
+              mountPath: /var/configs
+          env:
+            - name: PROMETHEUS_SERVER_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "cost-analyzer.fullname" . }}
+                  key: prometheus-server-endpoint
+            - name: CLOUD_PROVIDER_API_KEY
+              value: "AIzaSyDXQPG_MHUEy9neR7stolq6l0ujXmjJlvk" # The GCP Pricing API requires a key.
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /var/configs/key.json
+            - name: KUBECOST_TOKEN
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "cost-analyzer.fullname" . }}
+                  key: kubecost-token
+          imagePullPolicy: Always
+      imagePullSecrets:
+        - name: regcred

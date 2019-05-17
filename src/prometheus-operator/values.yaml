@@ -962,7 +962,8 @@ prometheus:
     ## reflected in the running Pods. To change the secrets mounted into the Prometheus Pods, the object must be deleted and recreated
     ## with the new list of secrets.
     ##
-    secrets: []
+    secrets:
+      - prometheus-operator-etcd
 
     ## ConfigMaps is a list of ConfigMaps in the same namespace as the Prometheus object, which shall be mounted into the Prometheus Pods.
     ## The ConfigMaps are mounted into /etc/prometheus/configmaps/.
@@ -1067,12 +1068,12 @@ prometheus:
 
     ## The remote_read spec configuration for Prometheus.
     ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#remotereadspec
-    remoteRead: {}
+    remoteRead: []
     # - url: http://remote1/read
 
     ## The remote_write spec configuration for Prometheus.
     ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#remotewritespec
-    remoteWrite: {}
+    remoteWrite: []
       # remoteWrite:
       #   - url: http://remote1/push
 

@@ -30,6 +30,7 @@ BACKUP_ROLE=k8s-jenkins-backup-$CLUSTER_NAME
 sed -i -e "s@{{DNS_ZONE}}@${DNS_ZONE}@g" src/jenkins/values.yaml
 sed -i -e "s@{{BACKUP_BUCKET}}@${BACKUP_BUCKET}@g" src/jenkins/values.yaml
 sed -i -e "s@{{BACKUP_ROLE}}@${BACKUP_ROLE}@g" src/jenkins/values.yaml
+sed -i -e "s@{{REGION}}@${REGION}@g" src/jenkins/values.yaml
 helm install --name jenkins stable/jenkins -f src/jenkins/values.yaml --namespace jenkins
 }
 ```

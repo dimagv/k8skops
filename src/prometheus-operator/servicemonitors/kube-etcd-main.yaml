@@ -10,6 +10,13 @@ spec:
   endpoints:
   - bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
     port: http-metrics
+    scheme: https
+    tlsConfig:
+      insecureSkipVerify: false
+      caFile: /etc/prometheus/secrets/prometheus-operator-etcd/ca
+      certFile: /etc/prometheus/secrets/prometheus-operator-etcd/cert
+      keyFile: /etc/prometheus/secrets/prometheus-operator-etcd/key
+      serverName: 127.0.0.1
   jobLabel: jobLabel
   namespaceSelector:
     matchNames:

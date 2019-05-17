@@ -1,0 +1,20 @@
+global:
+  prometheus:
+    enabled: true
+    fqdn: http://prometheus-operator-prometheus.monitoring:9090 #example fqdn. Ignored if enabled: true
+  grafana:
+    enabled: true
+    domainName: prometheus-operator-grafana.monitoring #example grafana domain Ignored if enabled: true
+  notifications:
+    slack: # Write to a webhook.
+      enabled: false # Allow kubecost to write to your slackbot.
+      webhook: https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX # Example Webhook
+    alertmanager: # Supply an alertmanager FQDN to receive notifications from the app.
+      enabled: true # Allow kubecost to write to your alertmanager
+      fqdn: http://prometheus-operator-alertmanager.monitoring:9093 #example fqdn. Ignored if prometheus.enabled: true
+  podAnnotations: {}
+    # iam.amazonaws.com/role: role-arn
+
+
+  
+  

@@ -2,20 +2,18 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: prometheus-operator-kube-etcd-main
-    jobLabel: kube-etcd-main
+    app: prometheus-operator-calico
     release: prometheus-operator
-    type: main
-  name: prometheus-operator-kube-etcd-main
+  name: prometheus-operator-calico
   namespace: kube-system
 spec:
   clusterIP: None
   ports:
   - name: http-metrics
-    port: 4001
+    port: 9091
     protocol: TCP
-    targetPort: 4001
+    targetPort: 9091
   selector:
-    k8s-app: etcd-manager-main
+    k8s-app: calico-node
   sessionAffinity: None
   type: ClusterIP

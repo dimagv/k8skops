@@ -30,7 +30,7 @@ velero restore create --from-backup <SCHEDULE NAME>-<TIMESTAMP>
 
 ### Kubewatch [link](https://github.com/bitnami-labs/kubewatch)
 
-`kubewatch` is a Kubernetes watcher that currently publishes notification to Slack. Run it in your k8s cluster, and you will get event notifications in a slack channel.
+`Kubewatch` is a Kubernetes watcher that currently publishes notification to Slack. Run it in your k8s cluster, and you will get event notifications in a slack channel.
 
 1. Create a new Bot: https://my.slack.com/services/new/bot
 2. Edit the bot to customize it's name, icon and retreive the API token (it starts with xoxb-)
@@ -45,4 +45,17 @@ sed -i -e "s@{{CHANNEL}}@${CHANNEL}@g" src/kubewatch/values.yaml
 sed -i -e "s@{{TOKEN}}@${TOKEN}@g" src/kubewatch/values.yaml
 helm install --name kubewatch stable/kubewatch --values=src/kubewatch/values.yaml --namespace kube-system
 }
+```
+
+### Kubecost [link](https://kubecost.com/)
+
+`Kubecost` project, which is created to monitor and manage Kubernetes resource spend.
+
+```sh
+{
+kubectl create ns kubecost
+helm install --name kubecost src/cost-analyzer --namespace kubecost
+}
+
+# kubectl -nkubecost port-forward svc/kubecost-cost-analyzer 9090:9090
 ```

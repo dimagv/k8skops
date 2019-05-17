@@ -1,0 +1,20 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    app: prometheus-operator-calico
+    release: prometheus-operator
+  name: prometheus-operator-calico
+  namespace: monitoring
+spec:
+  jobLabel: app
+  endpoints:
+  - interval: 30s
+    port: http-metrics
+  namespaceSelector:
+    matchNames:
+    - kube-system
+  selector:
+    matchLabels:
+      app: prometheus-operator-calico
+      release: prometheus-operator

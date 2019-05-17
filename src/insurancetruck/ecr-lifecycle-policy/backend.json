@@ -27,6 +27,36 @@
             },
             "description": "No more than 3 images for master branch",
             "rulePriority": 2
+        },
+        {
+            "action": {
+                "type": "expire"
+            },
+            "selection": {
+                "countType": "imageCountMoreThan",
+                "countNumber": 3,
+                "tagStatus": "tagged",
+                "tagPrefixList": [
+                    "demo-friday"
+                ]
+            },
+            "description": "No more than 3 images for demo-friday branch",
+            "rulePriority": 3
+        },
+        {
+            "action": {
+                "type": "expire"
+            },
+            "selection": {
+                "countType": "imageCountMoreThan",
+                "countNumber": 3,
+                "tagStatus": "tagged",
+                "tagPrefixList": [
+                    "pdf-forms"
+                ]
+            },
+            "description": "No more than 3 images for pdf-forms branch",
+            "rulePriority": 4
         }
     ]
 }

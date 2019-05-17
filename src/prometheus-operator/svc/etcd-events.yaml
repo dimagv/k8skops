@@ -16,6 +16,6 @@ spec:
     protocol: TCP
     targetPort: 4002
   selector:
-    k8s-app: etcd-server-events
+    k8s-app: etcd-manager-events
   sessionAffinity: None
   type: ClusterIP
