@@ -1,4 +1,4 @@
-###### [back](http://54.152.51.78:10080/ironjab/it-k8s)
+###### [back](https://github.com/dimagv/k8skops)
 
 # Step 1. Setup your environment
 
@@ -308,4 +308,4 @@ aws s3api put-bucket-versioning --bucket ironjab-k8s-ss --versioning-configurati
 
 # What's next?
 
-### Step 2. [Create Kubernetes cluster](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step2.md)
+### Step 2. [Create Kubernetes cluster](https://github.com/dimagv/k8skops/blob/master/docs/step2.md)

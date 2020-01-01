@@ -1,4 +1,4 @@
-###### [back](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step3.md)
+###### [back](https://github.com/dimagv/k8skops/blob/master/docs/step3.md)
 
 # Step 4. AuthN and AuthZ
 
@@ -157,4 +157,4 @@ kubectl apply -f src/admin-user/clusterrolebinding.yaml
 
 # What's next?
 
-### Step 5. [Monitoring](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step5.md)
+### Step 5. [Monitoring](https://github.com/dimagv/k8skops/blob/master/docs/step5.md)

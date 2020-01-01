@@ -1,4 +1,4 @@
-###### [back](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step6.md)
+###### [back](https://github.com/dimagv/k8skops/blob/master/docs/step6.md)
 
 # Step 7. Insurancetruck App
 
@@ -263,4 +263,4 @@ helm install --name frontend-$NAMESPACE -f src/insurancetruck/frontend/values.ya
 
 # What's next?
 
-### Step 8. [Jenkins (CI/CD)](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step8.md)
+### Step 8. [Jenkins (CI/CD)](https://github.com/dimagv/k8skops/blob/master/docs/step8.md)

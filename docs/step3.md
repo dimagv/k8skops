@@ -1,4 +1,4 @@
-###### [back](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step2.md)
+###### [back](https://github.com/dimagv/k8skops/blob/master/docs/step2.md)
 
 # Step 3. Configure cluster
 
@@ -121,4 +121,4 @@ kubectl -nkube-system create -f ./src/k8s-cleanup
 
 # What's next?
 
-### Step 4. [AuthN and AuthZ](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step4.md)
+### Step 4. [AuthN and AuthZ](https://github.com/dimagv/k8skops/blob/master/docs/step4.md)

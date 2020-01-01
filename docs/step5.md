@@ -1,4 +1,4 @@
-###### [back](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step4.md)
+###### [back](https://github.com/dimagv/k8skops/blob/master/docs/step4.md)
 
 # Step 5. Monitoring
 
@@ -69,4 +69,4 @@ kubectl create -f src/prometheus-operator/rule
 
 # What's next?
 
-### Step 6. [Logging](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step6.md)
+### Step 6. [Logging](https://github.com/dimagv/k8skops/blob/master/docs/step6.md)

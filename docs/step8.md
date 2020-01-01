@@ -1,4 +1,4 @@
-###### [back](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step7.md)
+###### [back](https://github.com/dimagv/k8skops/blob/master/docs/step7.md)
 
 # Step 8. Jenkins (CI/CD)
 
@@ -235,4 +235,4 @@ helm install --name jenkins stable/jenkins -f src/jenkins/values.yaml --namespac
 
 # What's next?
 
-### Step 9. [Additionally](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step9.md)
+### Step 9. [Additionally](https://github.com/dimagv/k8skops/blob/master/docs/step9.md)

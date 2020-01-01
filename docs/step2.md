@@ -1,4 +1,4 @@
-###### [back](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step1.md)
+###### [back](https://github.com/dimagv/k8skops/blob/master/docs/step1.md)
 
 # Step 2. Create Kubernetes cluster
 
@@ -37,4 +37,4 @@ watch kops validate cluster
 
 # What's next?
 
-### Step 3. [Configure cluster](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step3.md)
+### Step 3. [Configure cluster](https://github.com/dimagv/k8skops/blob/master/docs/step3.md)

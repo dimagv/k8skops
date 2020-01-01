@@ -1,4 +1,4 @@
-###### [back](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step5.md)
+###### [back](https://github.com/dimagv/k8skops/blob/master/docs/step5.md)
 
 # Step 6. Logging (EFK)
 
@@ -54,4 +54,4 @@ helm install stable/elasticsearch-curator --name=elasticsearch-curator --namespa
 
 # What's next?
 
-### Step 7. [Insurancetruck App](http://54.152.51.78:10080/ironjab/it-k8s/src/master/docs/step7.md)
+### Step 7. [Insurancetruck App](https://github.com/dimagv/k8skops/blob/master/docs/step7.md)
